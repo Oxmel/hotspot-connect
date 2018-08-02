@@ -14,24 +14,24 @@ password = ''
 
 
 #logging.getLogger("urllib3").setLevel(logging.WARNING)
-userAgent="Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0"
+user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0"
 
-authUrl = "https://id.orange.fr/auth_user/bin/auth_user.cgi"
-confirmAuth = "https://hautdebitmobile.orange.fr:8443/home/wassup"
-lostUrl = "https://r.orange.fr/Oid_lost"
+auth_url = "https://id.orange.fr/auth_user/bin/auth_user.cgi"
+confirm_auth = "https://hautdebitmobile.orange.fr:8443/home/wassup"
+lost_url = "https://r.orange.fr/Oid_lost"
 
 
-def performAuth():
-    headers = { 'user-agent' : userAgent }
+def perform_auth():
+    headers = { 'user-agent' : user_agent }
     session = requests.Session()
     cookies = {'co': '42'}
     params = {'co': '42', 'tt': '', 'tp': '', 'sv': 'owa', 'dp': 'basic',
-            'losturl': lostUrl, 'memorize_password': 'on', 'rl': confirmAuth,
+            'losturl': lost_url, 'memorize_password': 'on', 'rl': confirm_auth,
             'credential': username, 'password': password}
     try :
-        reqAuth = session.post(authUrl, cookies=cookies, data=params, headers=headers)
-        netStatus = diag.networkCheck()
-        if netStatus == 0 :
+        reqAuth = session.post(auth_url, cookies=cookies, data=params, headers=headers)
+        net_status = diag.network_check()
+        if net_status == 0 :
             logging.info('Authentifié avec succès, accès internet confirmé')
         else :
             logging.error("Authentification ignorée par le serveur!")

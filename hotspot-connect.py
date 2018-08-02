@@ -39,11 +39,11 @@ from src import auth
 from src import wifi
 
 # Fetch the full path of the script
-curPath = os.path.dirname(os.path.abspath(__file__))
+cur_path = os.path.dirname(os.path.abspath(__file__))
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 # Store the log file in the same folder as the script
-logging.basicConfig(filename='%s/connect.log' %curPath, level=logging.DEBUG,
+logging.basicConfig(filename='%s/connect.log' %cur_path, level=logging.DEBUG,
         format='%(asctime)s - [%(levelname)s]: %(message)s',
         datefmt='%d/%m/%Y %H:%M:%S')
 
@@ -51,23 +51,23 @@ logging.basicConfig(filename='%s/connect.log' %curPath, level=logging.DEBUG,
 logging.info('Lancement du script de monitoring')
 
 # Check if wpa_supplicant is running and if so kill the process
-diag.killWpa()
+diag.kill_wpa()
 
 # Association attempt with the first AP of the list (see wifi.py)
-wifi.joinAp()
+wifi.join_ap()
 
 
 while True :
 
-    netStatus = diag.networkCheck()
+    net_status = diag.network_check()
 
-    if netStatus == 1 :
+    if net_status == 1 :
         logging.info('Requête redirigée vers le portail captif')
         logging.info('Reconnexion en cours...')
-        #auth.performAuth()
+        #auth.perform_auth()
 
-    elif netStatus == 2 :
+    elif net_status == 2 :
         logging.warning('Problème réseau détecté!')
-        diag.networkDiag()
+        diag.network_diag()
 
     time.sleep(20)

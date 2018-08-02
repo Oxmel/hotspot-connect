@@ -13,23 +13,23 @@ import wifi
 FNULL = open(os.devnull, 'w')
 
 
-userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0"
-testUrl = "http://clients3.google.com/generate_204"
+user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0"
+test_url = "http://clients3.google.com/generate_204"
 
-stopWpa = "/bin/kill $(pidof wpa_supplicant)"
-fixDhcp = "/sbin/dhclient -r wlan0; /sbin/dhclient wlan0"
-fixIface = "/sbin/ifconfig wlan0 down; /sbin/ifconfig wlan0 up"
-apName = "/sbin/iwconfig wlan0 | /bin/grep -Po 'ESSID:\K\S*' | /bin/sed 's/\"//g'"
-conStatus = "/sbin/iwconfig wlan0 | /bin/grep -Po 'Access Point: \K\S*'"
+stop_wpa = "/bin/kill $(pidof wpa_supplicant)"
+fix_dhcp = "/sbin/dhclient -r wlan0; /sbin/dhclient wlan0"
+fix_iface = "/sbin/ifconfig wlan0 down; /sbin/ifconfig wlan0 up"
+ap_name = "/sbin/iwconfig wlan0 | /bin/grep -Po 'ESSID:\K\S*' | /bin/sed 's/\"//g'"
+con_status = "/sbin/iwconfig wlan0 | /bin/grep -Po 'Access Point: \K\S*'"
 
 
 # Return the result of a bash command (usually plain text)
-def checkCmd(cmd):
+def check_cmd(cmd):
     result = subprocess.check_output(cmd, shell=True).strip()
     return result
 
 # Send a command and hide the output
-def callCmd(cmd):
+def call_cmd(cmd):
     result = subprocess.check_call(cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
     return result
 
@@ -38,9 +38,9 @@ def callCmd(cmd):
 # Kill wpa_supplicant if the process is running before attempting to connect
 # Needed since we use iwconfig instead and both can't coexist
 # Perform this verification when the script starts
-def killWpa():
+def kill_wpa():
     try:
-        callCmd(stopWpa)
+        call_cmd(stop_wpa)
         logging.debug("Stopping wpa_supplicant")
     except subprocess.CalledProcessError:
         logging.debug("wpa_supplicant is not running")
@@ -61,26 +61,26 @@ def killWpa():
 # connection is closed (approx. 5min during my tests but this may vary)
 # So a timeout partially solves the problem, but this still has to be fixed
 # More info : https://stackoverflow.com/a/22377499
-def networkCheck():
+def network_check():
     try :
-        headers = { 'user-agent' : userAgent }
-        reqTest = requests.get(testUrl, headers=headers, timeout=(10, 10))
-        httpCode = reqTest.status_code
-        if httpCode == 204 :
+        headers = { 'user-agent' : user_agent }
+        req_test = requests.get(test_url, headers=headers, timeout=(10, 10))
+        http_code = req_test.status_code
+        if http_code == 204 :
             return 0
-        elif httpCode == 200 :
+        elif http_code == 200 :
             return 1
         else:
-            print httpCode
+            print http_code
     except requests.exceptions.RequestException as e:
         logging.debug(e)
         return 2
 
 
 
-def wifiStatus():
-    ssid = checkCmd(apName)
-    status = checkCmd(conStatus)
+def wifi_status():
+    ssid = check_cmd(ap_name)
+    status = check_cmd(con_status)
     if ssid == "FreeWifi" and status != "Not-Associated":
         return 0
         logging.debug("connecté")
@@ -93,36 +93,36 @@ def wifiStatus():
 # Main function that controls and tries to fix the connection
 # Verify if the client is connected to the hotspot or not and act accordingly
 # If after 3 attempts the network is still down, switch to another AP
-def networkDiag():
+def network_diag():
     i = 1
-    ssid = checkCmd(apName)
-    status = checkCmd(conStatus)
+    ssid = check_cmd(ap_name)
+    status = check_cmd(con_status)
 
     while i <= 3:
         logging.info("Tentative de réparation... (%s/3)" %i)
 
-        if wifiStatus() == 0:
+        if wifi_status() == 0:
             logging.debug("Connexion au hotstpot -> OK")
             logging.debug ("Fix DHCP")
-            callCmd(fixDhcp)
+            call_cmd(fix_dhcp)
 
         else :
             logging.debug("Connexion au hotstpot -> KO")
-            callCmd(fixIface)
+            call_cmd(fix_iface)
             time.sleep(5)
-            wifi.joinAp()
+            wifi.join_ap()
 
-        netStatus = networkCheck()
+        net_status = network_check()
 
-        if netStatus == 1 :
+        if net_status == 1 :
             logging.info('Connexion à nouveau opérationnelle')
             logging.info('Réauthentification en cours...')
-            #auth.performAuth()
+            #auth.perform_auth()
 
-        elif netStatus == 2 :
+        elif net_status == 2 :
             i = i + 1
             if i > 3:
                 logging.error("Impossible de retrouver un accès réseau")
                 logging.info("Changement de hotspot")
-                wifi.switchAp()
+                wifi.switch_ap()
 
