@@ -95,8 +95,6 @@ def wifi_status():
 # If after 3 attempts the network is still down, switch to another AP
 def network_diag():
     i = 1
-    ssid = check_cmd(ap_name)
-    status = check_cmd(con_status)
 
     while i <= 3:
         logging.info("Tentative de réparation... (%s/3)" %i)
