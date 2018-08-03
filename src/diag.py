@@ -18,27 +18,15 @@ FNULL = open(os.devnull, 'w')
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0"
 test_url = "http://clients3.google.com/generate_204"
 
-stop_wpa = "/bin/kill $(pidof wpa_supplicant)"
-
-
-# Return the result of a bash command (usually plain text)
-def check_cmd(cmd):
-    result = subprocess.check_output(cmd, shell=True).strip()
-    return result
-
-# Send a command and hide the output
-def call_cmd(cmd):
-    result = subprocess.check_call(cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-    return result
-
-
 
 # Kill wpa_supplicant if the process is running before attempting to connect
 # Needed since we use iwconfig instead and both can't coexist
 # Perform this verification when the script starts
 def kill_wpa():
+    cmd = "/bin/kill $(pidof wpa_supplicant)"
+
     try:
-        call_cmd(stop_wpa)
+        subprocess.check_call(cmd, shell=True)
         logging.debug("Stopping wpa_supplicant")
     except subprocess.CalledProcessError:
         logging.debug("wpa_supplicant is not running")
