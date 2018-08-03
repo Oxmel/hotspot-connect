@@ -37,6 +37,8 @@ def join_ap(ap=None):
 
     try:
         subprocess.check_call(associate, shell=True)
+        # Wait a bit in case the association takes more time than expected
+        time.sleep(5)
     except subprocess.CalledProcessError as e:
         logging.error(e)
 

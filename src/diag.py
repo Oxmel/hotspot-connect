@@ -102,7 +102,6 @@ def network_diag():
             logging.debug("Connexion au hotstpot -> KO")
             iface.iface_action("down")
             iface.iface_action("up")
-            time.sleep(5)
             wifi.join_ap()
 
         net_status = network_check()
