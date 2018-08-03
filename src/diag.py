@@ -9,6 +9,7 @@ import os
 import auth
 import wifi
 import iface
+import re
 
 # Equivalent of /dev/null in bash
 FNULL = open(os.devnull, 'w')
@@ -18,8 +19,6 @@ user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55
 test_url = "http://clients3.google.com/generate_204"
 
 stop_wpa = "/bin/kill $(pidof wpa_supplicant)"
-ap_name = "/sbin/iwconfig wlan0 | /bin/grep -Po 'ESSID:\K\S*' | /bin/sed 's/\"//g'"
-con_status = "/sbin/iwconfig wlan0 | /bin/grep -Po 'Access Point: \K\S*'"
 
 
 # Return the result of a bash command (usually plain text)
@@ -76,16 +75,23 @@ def network_check():
         return 2
 
 
-
 def wifi_status():
-    ssid = check_cmd(ap_name)
-    status = check_cmd(con_status)
-    if ssid == "FreeWifi" and status != "Not-Associated":
-        return 0
-        logging.debug("connecté")
-    else:
-        return 1
-        logging.debug("pas connecté")
+    cmd = "/sbin/iwconfig wlan0"
+
+    try:
+        result = subprocess.check_output(cmd, shell=True)
+        ssid = re.search(r'ESSID:(\S+)', result)
+        status = re.search(r'Access\sPoint:\s+(\S+)', result)
+        ssid = ssid.group(1).strip("\"")
+        status = status.group(1)
+
+        if ssid == "FreeWifi" and status != "Not-Associated":
+            return True
+        else:
+            return False
+
+    except subprocess.CalledProcessError as e:
+        logging.error(e)
 
 
 
@@ -98,7 +104,7 @@ def network_diag():
     while i <= 3:
         logging.info("Tentative de réparation... (%s/3)" %i)
 
-        if wifi_status() == 0:
+        if wifi_status():
             logging.debug("Connexion au hotstpot -> OK")
             logging.debug ("Fix DHCP")
             iface.dhcp_action("release")
@@ -116,6 +122,7 @@ def network_diag():
         if net_status == 1 :
             logging.info('Connexion à nouveau opérationnelle')
             logging.info('Réauthentification en cours...')
+            break
             #auth.perform_auth()
 
         elif net_status == 2 :
