@@ -8,6 +8,7 @@ import time
 import os
 import auth
 import wifi
+import iface
 
 # Equivalent of /dev/null in bash
 FNULL = open(os.devnull, 'w')
@@ -17,8 +18,6 @@ user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55
 test_url = "http://clients3.google.com/generate_204"
 
 stop_wpa = "/bin/kill $(pidof wpa_supplicant)"
-fix_dhcp = "/sbin/dhclient -r wlan0; /sbin/dhclient wlan0"
-fix_iface = "/sbin/ifconfig wlan0 down; /sbin/ifconfig wlan0 up"
 ap_name = "/sbin/iwconfig wlan0 | /bin/grep -Po 'ESSID:\K\S*' | /bin/sed 's/\"//g'"
 con_status = "/sbin/iwconfig wlan0 | /bin/grep -Po 'Access Point: \K\S*'"
 
@@ -102,11 +101,13 @@ def network_diag():
         if wifi_status() == 0:
             logging.debug("Connexion au hotstpot -> OK")
             logging.debug ("Fix DHCP")
-            call_cmd(fix_dhcp)
+            iface.dhcp_action("release")
+            iface.dhcp_action("renew")
 
         else :
             logging.debug("Connexion au hotstpot -> KO")
-            call_cmd(fix_iface)
+            iface.iface_action("down")
+            iface.iface_action("up")
             time.sleep(5)
             wifi.join_ap()
 

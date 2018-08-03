@@ -6,15 +6,11 @@ import time
 import logging
 import subprocess
 import diag
+import iface
 
 
 # Equivalent of /dev/null in bash
 FNULL = open(os.devnull, 'w')
-
-
-dhcp_release = "/sbin/dhclient -r wlan0"
-dhcp_renew = "/sbin/dhclient wlan0"
-ap_signal = "iwconfig wlan0 | grep -Po 'level=\K\-[0-9]{2} [a-zA-Z]{3}'"
 
 
 
@@ -28,17 +24,6 @@ ap_list = [
 
 # Global variable used to save a list index
 cur_index = 0
-
-
-# Return the result of a bash command (usually plain text)
-def check_cmd(cmd):
-    result = subprocess.check_output(cmd, shell=True).strip()
-    return result
-
-# Send a command and hide the output
-def call_cmd(cmd):
-    result = subprocess.check_call(cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-    return result
 
 
 # We use ap=None to set an optional arg
@@ -80,7 +65,7 @@ def switch_ap():
         cur_index = 0
     next_ap = ap_list[cur_index]
     logging.debug("DHCP release")
-    call_cmd(dhcp_release)
+    iface.dhcp_action("release")
     logging.debug("Leaving -> %s" %cur_ap)
     logging.debug("Joining -> %s" %next_ap)
     join_ap(next_ap)
