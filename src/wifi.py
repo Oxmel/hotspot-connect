@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-import os
 import time
 import logging
 import subprocess
 import diag
 import iface
-
-
-# Equivalent of /dev/null in bash
-FNULL = open(os.devnull, 'w')
 
 
 
@@ -42,16 +37,6 @@ def join_ap(ap=None):
     except subprocess.CalledProcessError as e:
         logging.error(e)
 
-# We use a blank essid to make the client disconnect from the current AP.
-# This command becomes useful when we want to start a scan because if the
-# client is connected to an AP, the scan result will only
-# show the AP he's currently connected to.
-def disconnect():
-    leave = "/sbin/iwconfig wlan0 essid ''"
-    try:
-        subprocess.check_call(leave, shell=True)
-    except subprocess.CalledProcessError as e:
-        logging.error(e)
 
 
 def switch_ap():
