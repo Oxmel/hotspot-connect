@@ -35,4 +35,10 @@ def iface_action(action):
         logging.error(e)
 
 
+def ip_flush():
+    cmd = "/bin/ip addr flush dev wlan0"
 
+    try:
+        subprocess.check_call(cmd, shell=True)
+    except subprocess.CalledProcessError as e:
+        logging.error(e)

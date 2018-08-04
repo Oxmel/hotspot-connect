@@ -120,5 +120,7 @@ def network_diag():
             if i > 3:
                 logging.error("Impossible de retrouver un accès réseau")
                 logging.info("Changement de hotspot")
+                # Flush interface config before switching, just in case
+                iface.ip_flush()
                 wifi.switch_ap()
 

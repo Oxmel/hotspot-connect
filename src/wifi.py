@@ -97,8 +97,6 @@ def switch_ap():
     else:
         cur_index = 0
     next_ap = ap_list[cur_index]
-    logging.debug("DHCP release")
-    iface.dhcp_action("release")
     logging.debug("Leaving -> %s" %cur_ap)
     logging.debug("Joining -> %s" %next_ap)
     join_ap(next_ap)
