@@ -88,6 +88,9 @@ def wifi_status():
 # If after 3 attempts the network is still down, switch to another AP
 def network_diag():
     i = 1
+    # Attempt to rejoin the same AP instead of looking for any AP around
+    cur_ap = wifi.ap_list[wifi.cur_index]
+    logging.debug("cur ap = %s" %cur_ap)
 
     while i <= 3:
         logging.info("Tentative de réparation... (%s/3)" %i)
@@ -102,7 +105,7 @@ def network_diag():
             logging.debug("Connexion au hotstpot -> KO")
             iface.iface_action("down")
             iface.iface_action("up")
-            wifi.join_ap()
+            wifi.join_ap(cur_ap)
 
         net_status = network_check()
 
