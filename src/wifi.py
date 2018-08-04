@@ -73,6 +73,13 @@ def join_ap(ap=None):
         subprocess.check_call(associate, shell=True)
         # Wait a bit in case the association takes more time than expected
         time.sleep(5)
+
+        # Need to manually request an ip after the association but only
+        # if the association is successfull. Otherwise dhclient will retry
+        # for like 20 seconds without any chance to obtain an ip
+        if diag.wifi_status():
+            iface.dhcp_action("renew")
+
     except subprocess.CalledProcessError as e:
         logging.error(e)
 
