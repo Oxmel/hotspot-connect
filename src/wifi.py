@@ -6,19 +6,58 @@ import logging
 import subprocess
 import diag
 import iface
-
+import re
 
 
 # Random MAC addresses for testing purposes
-ap_list = [
-    "BF:A5:C1:A5:4F:7B",
-    "AB:CE:7C:46:7B:74",
-    "2A:08:0A:D2:34:83"
-]
+ap_list = []
 
 
 # Global variable used to save a list index
 cur_index = 0
+
+
+
+# Look for APs that match a specific ESSID in the vicinity and generate a
+# list containing their BSSID. We then use this list both when the script
+# starts, or in case something goes wrong to switch to another AP.
+# Usually when the current AP fails to address the client or if it disappears.
+def scan():
+    global ap_list
+    scan = "/sbin/iwlist wlan0 scan"
+
+    try:
+        result = subprocess.check_output(scan, shell=True)
+        # Every block of info for each AP starts with the pattern :
+        # Cell (number) - Address: (a_mac_address)
+        # So we delimit each block before putting them in a list
+        result = result.split('Cell')
+
+        # Select blocks of info one by one and check if some of them are
+        # the APs we're looking for. If so, add the AP bssid in a list
+        for ap in result:
+            essid = re.search(r'ESSID:(\S+)', ap)
+            bssid = re.search(r'Address:\s+(\S+)', ap)
+            # Need to investigate why re always returns one 'None' even if
+            # the pattern matches
+            if essid:
+                essid = essid.group(1)
+                essid = essid.strip("\"")
+                if essid == "FreeWifi":
+                    bssid = bssid.group(1)
+                    ap_list.append(bssid)
+
+        if ap_list == []:
+            logging.error("Aucun AP trouvé dans les environs, sortie")
+            exit(1)
+        else:
+            list_len = len(ap_list)
+            logging.info("%s APs trouvés dans les environs" %list_len)
+
+    except subprocess.CalledProcessError as e:
+        logging.error(e)
+
+
 
 
 # We use ap=None to set an optional arg
