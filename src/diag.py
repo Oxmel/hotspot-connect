@@ -73,7 +73,7 @@ def wifi_status():
         ssid = ssid.group(1).strip("\"")
         status = status.group(1)
 
-        if ssid == "FreeWifi" and status != "Not-Associated":
+        if ssid == "orange" and status != "Not-Associated":
             return True
         else:
             return False

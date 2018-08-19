@@ -43,7 +43,7 @@ def scan():
             if essid:
                 essid = essid.group(1)
                 essid = essid.strip("\"")
-                if essid == "FreeWifi":
+                if essid == "orange":
                     bssid = bssid.group(1)
                     ap_list.append(bssid)
 
@@ -65,9 +65,9 @@ def scan():
 # Or to connect to a specific AP with a given ESSID and BSSID
 def join_ap(ap=None):
     if ap:
-        associate = "/sbin/iwconfig wlan0 essid 'FreeWifi' ap %s" %ap
+        associate = "/sbin/iwconfig wlan0 essid 'orange' ap %s" %ap
     else:
-        associate = "/sbin/iwconfig wlan0 essid 'FreeWifi'"
+        associate = "/sbin/iwconfig wlan0 essid 'orange'"
 
     try:
         subprocess.check_call(associate, shell=True)
