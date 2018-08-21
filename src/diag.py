@@ -112,8 +112,8 @@ def network_diag():
         if net_status == 1 :
             logging.info('Connexion à nouveau opérationnelle')
             logging.info('Réauthentification en cours...')
+            auth.perform_auth()
             break
-            #auth.perform_auth()
 
         elif net_status == 2 :
             i = i + 1

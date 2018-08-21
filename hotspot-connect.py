@@ -79,7 +79,7 @@ while True :
     if net_status == 1 :
         logging.info('Requête redirigée vers le portail captif')
         logging.info('Reconnexion en cours...')
-        #auth.perform_auth()
+        auth.perform_auth()
 
     elif net_status == 2 :
         logging.warning('Problème réseau détecté!')
