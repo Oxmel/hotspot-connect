@@ -77,7 +77,12 @@ def join_ap(ap=None):
         # Need to manually request an ip after the association but only
         # if the association is successfull. Otherwise dhclient will retry
         # for like 20 seconds without any chance to obtain an ip
+        # Note : Need to perform a dhcp release (dhclient -r) before
+        # requesting an IP even if the client is not addressed yet.
+        # Otherwise dhclient will spawn a new process everytime without
+        # killing the old one
         if diag.wifi_status():
+            iface.dhcp_action("release")
             iface.dhcp_action("renew")
 
     except subprocess.CalledProcessError as e:
