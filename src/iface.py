@@ -25,9 +25,9 @@ def dhcp_action(action):
 
 def iface_action(action):
     if action == "down":
-        cmd = "/sbin/ifconfig wlan0 down"
+        cmd = "/sbin/ip link set wlan0 down"
     elif action == "up":
-        cmd = "/sbin/ifconfig wlan0 up"
+        cmd = "/sbin/ip link set wlan0 up"
 
     try:
         subprocess.check_call(cmd, shell=True)
