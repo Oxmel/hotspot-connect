@@ -47,16 +47,18 @@ def scan():
                     bssid = bssid.group(1)
                     ap_list.append(bssid)
 
-        if ap_list == []:
-            logging.error("Aucun AP trouvé dans les environs, sortie")
-            exit(1)
-        else:
-            list_len = len(ap_list)
-            logging.info("%s APs trouvés dans les environs" %list_len)
-
     except subprocess.CalledProcessError as e:
         logging.error(e)
 
+    # The function can sometimes return an empty list for several reasons
+    # Mainly because there are no APs with the specified essid around
+    # Or because iw fails to read scan data (interface down)
+    if ap_list == []:
+        logging.error("Aucun AP trouvé dans les environs, sortie")
+        exit(1)
+    else:
+        list_len = len(ap_list)
+        logging.info("%s APs trouvés dans les environs" %list_len)
 
 
 
