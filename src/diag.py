@@ -19,19 +19,6 @@ user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55
 test_url = "http://clients3.google.com/generate_204"
 
 
-# Kill wpa_supplicant if the process is running before attempting to connect
-# Needed since we use iwconfig instead and both can't coexist
-# Perform this verification when the script starts
-def kill_wpa():
-    cmd = "/bin/kill $(pidof wpa_supplicant)"
-
-    try:
-        subprocess.check_call(cmd, shell=True)
-        logging.debug("Stopping wpa_supplicant")
-    except subprocess.CalledProcessError:
-        logging.debug("wpa_supplicant is not running")
-
-
 
 # Check if the client has access to the net
 # Code 0 = internet access
@@ -63,58 +50,29 @@ def network_check():
         return 2
 
 
-def wifi_status():
-    cmd = "/sbin/iwconfig wlan0"
+def network_diag():
+    cmd = "/sbin/wpa_cli -i wlan0 status"
 
     try:
         result = subprocess.check_output(cmd, shell=True)
-        ssid = re.search(r'ESSID:(\S+)', result)
-        status = re.search(r'Access\sPoint:\s+(\S+)', result)
-        ssid = ssid.group(1).strip("\"")
-        status = status.group(1)
+        bssid = (re.search('bssid=(\S+)', result).group(1))
+        wpa_state = (re.search('wpa_state=(\S+)', result).group(1))
+        ip_address = (re.search('ip_address=(\S+)', result).group(1))
 
-        if ssid == "orange" and status != "Not-Associated":
-            return True
-        else:
-            return False
+        if wpa_state == "COMPLETED" and ip_address.startswith("169.254"):
+            logging.debug("Dysfonctionnement de l'AP, changement de hotspot")
+            # blacklist the current AP's bssid and reassociate with the nearest
+            # AP in the vicinity
+            wifi.blacklist(bssid)
+            wifi.reassociate()
+            time.sleep(10)
+
+        elif wpa_state != "COMPLETED":
+            logging.debug("Connexion au hotspot perdue, tentative de fix")
+            # Tell wpa_supplicant to associate with the nearest AP
+            wifi.reassociate()
 
     except subprocess.CalledProcessError as e:
         logging.error(e)
 
-
-
-# Main function that controls and tries to fix the connection
-# Verify if the client is connected to the hotspot or not and act accordingly
-# If after 3 attempts the network is still down, switch to another AP
-def network_diag():
-    i = 1
-    # Attempt to rejoin the same AP instead of looking for any AP around
-
-    while i <= 3:
-        logging.info("Tentative de réparation... (%s/3)" %i)
-
-        if wifi_status():
-            logging.debug("Connexion au hotstpot -> OK")
-            logging.debug ("Fix DHCP")
-            iface.dhcp_action("release")
-            iface.dhcp_action("renew")
-
-        else :
-            logging.debug("Connexion au hotstpot -> KO")
-
-        net_status = network_check()
-
-        if net_status == 1 :
-            logging.info('Connexion à nouveau opérationnelle')
-            logging.info('Réauthentification en cours...')
-            auth.perform_auth()
-            break
-
-        elif net_status == 2 :
-            i = i + 1
-            if i > 3:
-                logging.error("Impossible de retrouver un accès réseau")
-                logging.info("Changement de hotspot")
-                # Flush interface config before switching, just in case
-                iface.ip_flush()
 
