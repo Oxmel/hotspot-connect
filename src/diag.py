@@ -89,8 +89,6 @@ def wifi_status():
 def network_diag():
     i = 1
     # Attempt to rejoin the same AP instead of looking for any AP around
-    cur_ap = wifi.ap_list[wifi.cur_index]
-    logging.debug("cur ap = %s" %cur_ap)
 
     while i <= 3:
         logging.info("Tentative de réparation... (%s/3)" %i)
@@ -103,9 +101,6 @@ def network_diag():
 
         else :
             logging.debug("Connexion au hotstpot -> KO")
-            iface.iface_action("down")
-            iface.iface_action("up")
-            wifi.join_ap(cur_ap)
 
         net_status = network_check()
 
@@ -122,5 +117,4 @@ def network_diag():
                 logging.info("Changement de hotspot")
                 # Flush interface config before switching, just in case
                 iface.ip_flush()
-                wifi.switch_ap()
 
