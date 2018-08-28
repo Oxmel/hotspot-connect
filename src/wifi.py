@@ -4,6 +4,7 @@
 import time
 import logging
 import subprocess
+import sys
 
 
 # Get connection infos using wpa_cli
@@ -14,8 +15,11 @@ def status():
     try:
         result = subprocess.check_output(cmd, shell=True)
         return result
+    # We have no other choice than exiting at this point because if
+    # we can't call wpa_cli, this means wpa_supplicant probably crashed
     except subprocess.CalledProcessError as e:
-        logging.error(e)
+        logging.critical(e)
+        sys.exit(1)
 
 
 # If an AP fails to address the client, it usually means there is a problem
