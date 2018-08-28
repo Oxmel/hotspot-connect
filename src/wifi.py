@@ -6,6 +6,18 @@ import logging
 import subprocess
 
 
+# Get connection infos using wpa_cli
+def status():
+
+    cmd = "/sbin/wpa_cli -i wlan0 status"
+
+    try:
+        result = subprocess.check_output(cmd, shell=True)
+        return result
+    except subprocess.CalledProcessError as e:
+        logging.error(e)
+
+
 # If an AP fails to address the client, it usually means there is a problem
 # on the hotspot side, so we blacklist its bssid to tell wp_supplicant to
 # ignore it when attempting to reassociate with the nearest AP

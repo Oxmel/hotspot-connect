@@ -51,28 +51,33 @@ def network_check():
 
 
 def network_diag():
-    cmd = "/sbin/wpa_cli -i wlan0 status"
 
+    result = wifi.status()
+
+    bssid = (re.search('bssid=(\S+)', result).group(1))
+    wpa_state = (re.search('wpa_state=(\S+)', result).group(1))
+
+    # In some very specific cases, wpa_cli may return no ip address at all
+    # usually when the client is not connected to any AP. Which is not
+    # supposed to happen but better catch the error to prevent the script
+    # from completely crashing
+    # Another solution could be to check if the line is present before
+    # attempting to parse it with re
     try:
-        result = subprocess.check_output(cmd, shell=True)
-        bssid = (re.search('bssid=(\S+)', result).group(1))
-        wpa_state = (re.search('wpa_state=(\S+)', result).group(1))
         ip_address = (re.search('ip_address=(\S+)', result).group(1))
+    except AttributeError:
+        ip_address = None
 
-        if wpa_state == "COMPLETED" and ip_address.startswith("169.254"):
-            logging.debug("Dysfonctionnement de l'AP, changement de hotspot")
-            # blacklist the current AP's bssid and reassociate with the nearest
-            # AP in the vicinity
-            wifi.blacklist(bssid)
-            wifi.reassociate()
-            time.sleep(10)
+    if wpa_state == "COMPLETED" and ip_address.startswith("169.254"):
+        logging.debug("Dysfonctionnement de l'AP, changement de hotspot")
+        # blacklist the current AP's bssid and reassociate with the nearest
+        # AP in the vicinity
+        wifi.blacklist(bssid)
+        wifi.reassociate()
+        time.sleep(10)
 
-        elif wpa_state != "COMPLETED":
-            logging.debug("Connexion au hotspot perdue, tentative de fix")
-            # Tell wpa_supplicant to associate with the nearest AP
-            wifi.reassociate()
-
-    except subprocess.CalledProcessError as e:
-        logging.error(e)
-
+    elif wpa_state != "COMPLETED":
+        logging.debug("Connexion au hotspot perdue, tentative de fix")
+        # Tell wpa_supplicant to associate with the nearest AP
+        wifi.reassociate()
 
