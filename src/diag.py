@@ -54,28 +54,34 @@ def network_diag():
 
     result = wifi.status()
 
-    bssid = (re.search('bssid=(\S+)', result).group(1))
+    # It's safe to directly grab the connection state without error catching
+    # as this info is always available no matter what
     wpa_state = (re.search('wpa_state=(\S+)', result).group(1))
 
-    # In some very specific cases, wpa_cli may return no ip address at all
-    # usually when the client is not connected to any AP. Which is not
-    # supposed to happen but better catch the error to prevent the script
-    # from completely crashing
-    # Another solution could be to check if the line is present before
-    # attempting to parse it with re
-    try:
-        ip_address = (re.search('ip_address=(\S+)', result).group(1))
-    except AttributeError:
-        ip_address = None
+    # The bssid is only available if the client is associated with an AP
+    if wpa_state == "COMPLETED":
+        bssid = (re.search('bssid=(\S+)', result).group(1))
+        # Even if the client is already associated, there are probably
+        # some cases where the ip_address may not be available so just
+        # in case we catch an eventual error if re founds nothing
+        try:
+            ip_address = (re.search('ip_address=(\S+)', result).group(1))
+        except AttributeError:
+            ip_address = None
 
-    if wpa_state == "COMPLETED" and ip_address.startswith("169.254"):
-        logging.debug("Dysfonctionnement de l'AP, changement de hotspot")
-        # blacklist the current AP's bssid and reassociate with the nearest
-        # AP in the vicinity
-        wifi.blacklist(bssid)
-        wifi.reassociate()
-        time.sleep(10)
+        if ip_address.startswith("169.254"):
+            logging.debug("Dysfonctionnement de l'AP, changement de hotspot")
+            # blacklist the current AP's bssid and reassociate with the nearest
+            # AP in the vicinity
+            wifi.blacklist(bssid)
+            wifi.reassociate()
+            time.sleep(10)
 
+        elif ip_address == None:
+            print "Need to do something"
+
+    # TODO : Need to interpret the different status returned by wpa_cli
+    # like 'SCANNING', 'INACTIVE',... and do something with them
     elif wpa_state != "COMPLETED":
         logging.debug("Connexion au hotspot perdue, tentative de fix")
         # Tell wpa_supplicant to associate with the nearest AP
