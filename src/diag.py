@@ -52,22 +52,13 @@ def network_check():
 
 def network_diag():
 
-    result = wifi.status()
-
-    # It's safe to directly grab the connection state without error catching
-    # as this info is always available no matter what
-    wpa_state = (re.search('wpa_state=(\S+)', result).group(1))
+    wifi_info = wifi.status()
+    wpa_state = wifi_info["wpa_state"]
 
     # The bssid is only available if the client is associated with an AP
     if wpa_state == "COMPLETED":
-        bssid = (re.search('bssid=(\S+)', result).group(1))
-        # Even if the client is already associated, there are probably
-        # some cases where the ip_address may not be available so just
-        # in case we catch an eventual error if re founds nothing
-        try:
-            ip_address = (re.search('ip_address=(\S+)', result).group(1))
-        except AttributeError:
-            ip_address = None
+        bssid = wifi_info["bssid"]
+        ip_address = wifi_info["ip_address"]
 
         if ip_address.startswith("169.254"):
             logging.debug("Dysfonctionnement de l'AP, changement de hotspot")

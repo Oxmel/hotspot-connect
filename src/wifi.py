@@ -11,10 +11,20 @@ import sys
 def status():
 
     cmd = "/sbin/wpa_cli -i wlan0 status"
+    wifi_infos = {}
 
     try:
         result = subprocess.check_output(cmd, shell=True)
-        return result
+
+        for line in result.splitlines():
+            name, var = line.split("=")
+            wifi_infos[name] = var
+
+        if "ip_address" not in wifi_infos:
+            wifi_infos["ip_address"] = None
+
+        return wifi_infos
+
     # We have no other choice than exiting at this point because if
     # we can't call wpa_cli, this means wpa_supplicant probably crashed
     except subprocess.CalledProcessError as e:
