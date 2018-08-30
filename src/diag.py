@@ -60,10 +60,11 @@ def network_diag():
         bssid = wifi_info["bssid"]
         ip_address = wifi_info["ip_address"]
 
+        # If the client obtains an ip address that starts with '169.254'
+        # this means the dhcp server of the AP is faulty so we need
+        # to tell wpa_supplicant to ignore it and find another one
         if ip_address.startswith("169.254"):
             logging.debug("Dysfonctionnement de l'AP, changement de hotspot")
-            # blacklist the current AP's bssid and reassociate with the nearest
-            # AP in the vicinity
             wifi.blacklist(bssid)
             wifi.reassociate()
 
@@ -73,6 +74,11 @@ def network_diag():
     # This state has (theorically) very little chance to be encountered
     # unless wpa_supplicant takes more time than usual to connect to the
     # nearest AP. Or if a diag is performed right when this event occurs
+    #
+    # Note that this doesn't take into account the edge case where only
+    # very few APs are in range and they all fail to address the client
+    # In this case they'll all be blacklisted and wpa_supplicant will
+    # enter in scanning mode forever.
     elif wpa_state == "SCANNING":
         logging.info("wpa_supplicant scanne les AP alentours")
 
