@@ -66,7 +66,6 @@ def network_diag():
             # AP in the vicinity
             wifi.blacklist(bssid)
             wifi.reassociate()
-            time.sleep(10)
 
         elif ip_address == None:
             logging.info("Aucune IP attribuée")
