@@ -54,3 +54,13 @@ def reassociate():
         subprocess.check_call(cmd, shell=True)
     except subprocess.CalledProcessError as e:
         logging.error(e)
+
+# Like reassociate but only takes effect if already disconnected
+def reconnect():
+
+    cmd = "/sbin/wpa_cli reconnect"
+
+    try:
+        subprocess.check_call(cmd, shell=True)
+    except subprocess.CalledProcessError as e:
+        logging.error(e)

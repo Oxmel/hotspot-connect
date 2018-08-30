@@ -69,12 +69,21 @@ def network_diag():
             time.sleep(10)
 
         elif ip_address == None:
-            print "Need to do something"
+            logging.info("Aucune IP attribuée")
 
-    # TODO : Need to interpret the different status returned by wpa_cli
-    # like 'SCANNING', 'INACTIVE',... and do something with them
-    elif wpa_state != "COMPLETED":
-        logging.debug("Connexion au hotspot perdue, tentative de fix")
-        # Tell wpa_supplicant to associate with the nearest AP
-        wifi.reassociate()
+    # This state has (theorically) very little chance to be encountered
+    # unless wpa_supplicant takes more time than usual to connect to the
+    # nearest AP. Or if a diag is performed right when this event occurs
+    elif wpa_state == "SCANNING":
+        logging.info("wpa_supplicant scanne les AP alentours")
 
+    # Like above this has very little chance to happen because this state
+    # is usually the result of a manual disconnection
+    elif wpa_state == "DISCONNECTED":
+        logging.info("Déconnecté du hotspot, reconnexion...")
+        wifi.reconnect()
+
+    else:
+        logging.warning("Exception non gérée")
+        logging.debug("status wifi : %s" %wifi_infos["wpa_state"])
+        logging.debug("adresse ip : %s" %wifi_infos["ip_address"])
