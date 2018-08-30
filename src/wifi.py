@@ -35,9 +35,11 @@ def status():
 # If an AP fails to address the client, it usually means there is a problem
 # on the hotspot side, so we blacklist its bssid to tell wp_supplicant to
 # ignore it when attempting to reassociate with the nearest AP
-def blacklist(ap):
+# To blacklist a specific ap : blacklist("mac_address")
+# To clear the blacklist : blacklist("clear")
+def blacklist(arg):
 
-    cmd = "/sbin/wpa_cli blacklist %s" %ap
+    cmd = "/sbin/wpa_cli blacklist %s" %arg
 
     try:
         subprocess.check_call(cmd, shell=True)
