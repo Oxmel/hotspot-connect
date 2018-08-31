@@ -5,7 +5,6 @@ import subprocess
 import requests
 import logging
 import time
-import os
 import auth
 import wifi
 import iface
@@ -21,10 +20,6 @@ import re
 # (understand 'fail to give the client an ip address') and still be broken
 # even after several days. Which suggests that the addressing is not managed
 # independently by each router but centralized elsewhere.
-
-
-# Equivalent of /dev/null in bash
-FNULL = open(os.devnull, 'w')
 
 
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0"

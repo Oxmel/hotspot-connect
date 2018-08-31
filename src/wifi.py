@@ -5,6 +5,10 @@ import time
 import logging
 import subprocess
 import sys
+import os
+
+# Equivalent of /dev/null in bash
+FNULL = open(os.devnull, 'w')
 
 
 # Get connection infos using wpa_cli
@@ -42,7 +46,7 @@ def blacklist(arg):
     cmd = "/sbin/wpa_cli blacklist %s" %arg
 
     try:
-        subprocess.check_call(cmd, shell=True)
+        subprocess.check_call(cmd, shell=True, stdout=FNULL)
     except subprocess.CalledProcessError as e:
         logging.error(e)
 
@@ -53,7 +57,7 @@ def reassociate():
     cmd = "/sbin/wpa_cli reassociate"
 
     try:
-        subprocess.check_call(cmd, shell=True)
+        subprocess.check_call(cmd, shell=True, stdout=FNULL)
     except subprocess.CalledProcessError as e:
         logging.error(e)
 
@@ -63,6 +67,6 @@ def reconnect():
     cmd = "/sbin/wpa_cli reconnect"
 
     try:
-        subprocess.check_call(cmd, shell=True)
+        subprocess.check_call(cmd, shell=True, stdout=FNULL)
     except subprocess.CalledProcessError as e:
         logging.error(e)
