@@ -51,7 +51,7 @@ logging.basicConfig(filename='%s/connect.log' %cur_path, level=logging.DEBUG,
 logging.info('Lancement du script de monitoring')
 
 # Clear the blacklist each time the script starts to avoid the situation
-# where an AP could stay in the bl forever even if it starts working again
+# where an AP could stay in the bl even if it starts working again
 logging.debug('Clearing the blacklist')
 wifi.blacklist("clear")
 

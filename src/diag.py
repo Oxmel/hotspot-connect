@@ -11,6 +11,18 @@ import wifi
 import iface
 import re
 
+
+# This module checks the connection and tries various fixes depending on
+# the connection state as soon as the script detects an internet cut
+#
+# Btw, in a perfect world, if an AP is faulty, all we have to do is to switch
+# to the next one in range. But from my tests, out of ten 'orange' hotspots
+# in the vicinity, all of them can suddenly break at the same time
+# (understand 'fail to give the client an ip address') and still be broken
+# even after several days. Which suggests that the addressing is not managed
+# independently by each router but centralized elsewhere.
+
+
 # Equivalent of /dev/null in bash
 FNULL = open(os.devnull, 'w')
 
@@ -50,6 +62,11 @@ def network_check():
         return 2
 
 
+
+# Check the connection state and if the client has a valid ip attributed
+# Note that in certain circumstances, especially if the AP is very far
+# away, the connection can be broken even with a valid ip and a
+# connection state that could let us think that everything is ok
 def network_diag():
 
     wifi_info = wifi.status()
@@ -74,11 +91,6 @@ def network_diag():
     # This state has (theorically) very little chance to be encountered
     # unless wpa_supplicant takes more time than usual to connect to the
     # nearest AP. Or if a diag is performed right when this event occurs
-    #
-    # Note that this doesn't take into account the edge case where only
-    # very few APs are in range and they all fail to address the client
-    # In this case they'll all be blacklisted and wpa_supplicant will
-    # enter in scanning mode forever.
     elif wpa_state == "SCANNING":
         logging.info("wpa_supplicant scanne les AP alentours")
 
