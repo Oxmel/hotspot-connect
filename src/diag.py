@@ -99,5 +99,4 @@ def network_diag():
 
     else:
         logging.warning("Exception non gérée")
-        logging.debug("status wifi : %s" %wifi_infos["wpa_state"])
-        logging.debug("adresse ip : %s" %wifi_infos["ip_address"])
+        logging.debug("status wifi : %s" %wpa_state)
