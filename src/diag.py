@@ -82,6 +82,7 @@ def network_diag():
             logging.debug("Dysfonctionnement de l'AP, changement de hotspot")
             wifi.blacklist(bssid)
             wifi.reassociate()
+            time.sleep(10)
 
 
     # This state has (theorically) very little chance to be encountered
