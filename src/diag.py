@@ -8,7 +8,6 @@ import time
 import auth
 import wifi
 import iface
-import re
 
 
 # This module checks the connection and tries various fixes depending on
