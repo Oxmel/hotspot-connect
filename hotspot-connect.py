@@ -38,14 +38,35 @@ from src import diag
 from src import auth
 from src import wifi
 
-# Fetch the full path of the script
-cur_path = os.path.dirname(os.path.abspath(__file__))
+
+# Instantiate the logger and set global level to 'Debug'
+# Note that we can set a log level for each handler independently
+# e.g : 'DEBUG' for logfile and 'WARNING' for console (stdout)
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+# By default, any new HTTP connection started by urllib3 is logged as 'INFO'
+# So we set log level to 'WARNING' as we don't need those lines
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
-# Store the log file in the same folder as the script
-logging.basicConfig(filename='%s/connect.log' %cur_path, level=logging.DEBUG,
-        format='%(asctime)s - [%(levelname)s]: %(message)s',
-        datefmt='%d/%m/%Y %H:%M:%S')
+# Create file handler and set logfile name
+file_handler = logging.FileHandler('connect.log')
+file_handler.setLevel(logging.DEBUG)
+
+# Create console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+
+# Create formatter and set a custom datetime format (day/month/year)
+formatter = logging.Formatter('%(asctime)s - [%(levelname)s]: %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
+
+# Add the formatter to each handler
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+# Add both handlers to logger
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 
 logging.info('Lancement du script de monitoring')
