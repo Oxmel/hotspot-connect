@@ -34,7 +34,7 @@ def perform_auth():
     session = requests.Session()
 
     try :
-        session.get(init_cookie)
+        session.get(init_cookie, headers=headers)
         session.post(send_login, json=login_data, headers=headers)
         session.post(send_pwd, json=pwd_data, headers=headers)
         session.get(get_portal, headers=headers)
