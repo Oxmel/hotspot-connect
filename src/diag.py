@@ -71,18 +71,15 @@ def network_diag():
         bssid = wifi_info["bssid"]
         ip_address = wifi_info["ip_address"]
 
-        if ip_address == None:
-            logging.info("Aucune IP attribuée")
-
         # If the client obtains an ip address that starts with '169.254'
+        # or if the client doesn't obtain an ip (depending on the platform)
         # this means the dhcp server of the AP is faulty so we need
         # to tell wpa_supplicant to ignore it and find another one
-        elif ip_address.startswith("169.254"):
-            logging.debug("Dysfonctionnement de l'AP, changement de hotspot")
+        if ip_address.startswith("169.254") or ip_address == None:
+            logging.warning("AP hors service, changement de hotspot...")
             wifi.blacklist(bssid)
             wifi.reassociate()
             time.sleep(10)
-
 
     # This state has (theorically) very little chance to be encountered
     # unless wpa_supplicant takes more time than usual to connect to the
