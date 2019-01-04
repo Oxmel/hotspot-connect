@@ -2,49 +2,71 @@
 # -*- coding: UTF-8 -*-
 
 import requests
+import json
 import logging
 import diag
 
 
-# Those credentials are needed in order to connect to the captive portal
-# The username is either a phone number or a mail address for orange hotspots
+# Those credentials are needed to connect to the captive portal
+# The username is either a phone number or a mail address
 username = ''
 password = ''
 
-# Humanize the script by using a 'normal' user-agent in the header
-user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0"
+# Humanize the script by using a 'standard' user-agent in the header
+headers = {
+    'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:64.0) '
+                   'Gecko/20100101 Firefox/64.0')
+    }
 
-# List of urls to use in order to log in the user
-init_cookie = "https://login.orange.fr"
-send_login = "https://login.orange.fr/front/login"
-send_pwd = "https://login.orange.fr/front/password"
-get_portal = "https://hautdebitmobile.orange.fr:8443/home"
-portal_connect = "https://hautdebitmobile.orange.fr:8443/home/wassup"
+# Gotta find a way to store those infos in a more readable fashion
+auth_data = [
+    {
+        'method': 'GET',
+        'url': 'https://login.orange.fr'
+    },
+    {
+        'method': 'POST',
+        'url': 'https://login.orange.fr/front/login',
+        'payload': {'login': username, 'mem': 'true'}
+    },
+    {
+        'method': 'POST',
+        'url': 'https://login.orange.fr/front/password',
+        'payload': {'login': username, 'password': password}
+    },
+    {
+        'method': 'GET',
+        'url': 'https://hautdebitmobile.orange.fr:8443/home'
+    },
+    {
+        'method': 'GET',
+        'url': 'https://hautdebitmobile.orange.fr:8443/home/wassup',
+        'payload': {'isCgu': 'on', 'doCheckCgu': '1'}
+    }
+]
 
-# Pass the user-agent in the header of the request
-headers = { 'user-agent': user_agent }
-
-# Forge data before sending them to the server
-login_data = { 'login': username }
-pwd_data = { 'login': username, 'password': password }
-accept_cgu = {'isCgu': 'on', 'hidden_isCgu': '', 'doCheckCgu': '1'}
-
+# Requests will raise an exception for any HTTP error (4xx, 5xx)
+# We also catch any other exception like timeout, connection error,...
+# http://docs.python-requests.org/en/master/api/?highlight=exceptions
 def perform_auth():
-    # Let requests handle the cookies for us
     session = requests.Session()
+    for item in auth_data:
+        method = item['method']
+        url = item['url']
+        payload = json.dumps(item.get('payload'))
+        try:
+            req = session.request(method, url, data=payload,
+                                  headers=headers, timeout=(10, 10))
+            req.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            logging.critical(e)
+            exit(1)
 
-    try :
-        session.get(init_cookie, headers=headers)
-        session.post(send_login, json=login_data, headers=headers)
-        session.post(send_pwd, json=pwd_data, headers=headers)
-        session.get(get_portal, headers=headers)
-        session.get(portal_connect, params=accept_cgu, headers=headers)
-
-        net_status = diag.network_check()
-        if net_status == 0 :
-            logging.info('Authentifié avec succès, accès internet confirmé')
-        else :
-            logging.error("Authentification ignorée par le serveur!")
-
-    except requests.exceptions.RequestException as e:
-        logging.error(e)
+    # At this point we could assume the authentication is successful
+    # as requests didn't raise any error. But it's probably safer to
+    # manually check if internet is reachable to have a confirmation
+    if diag.network_check() == 0:
+        logging.info('Connected')
+    else:
+        loggin.critical('Connection failed!')
+        exit(2)
