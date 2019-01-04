@@ -68,5 +68,5 @@ def perform_auth():
     if diag.network_check() == 0:
         logging.info('Connected')
     else:
-        loggin.critical('Connection failed!')
+        logging.critical('Connection failed!')
         exit(2)
