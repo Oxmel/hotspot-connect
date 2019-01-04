@@ -61,17 +61,14 @@ def network_check():
 # Check the connection state and if the client has a valid ip attributed
 # Note that in certain circumstances, especially if the AP is very far
 # away, the connection can be broken even with a valid ip and a
-# connection state that could let us think that everything is ok
+# connection state that could let us think everything is ok
 def network_diag():
-
     wifi_info = wifi.status()
     wpa_state = wifi_info["wpa_state"]
-
     # The bssid is only available if the client is associated with an AP
     if wpa_state == "COMPLETED":
         bssid = wifi_info["bssid"]
-        ip_address = wifi_info["ip_address"]
-
+        ip_address = wifi_info.get("ip_address")
         # If the client obtains an ip address that starts with '169.254'
         # or if the client doesn't obtain an ip (depending on the platform)
         # this means the dhcp server of the AP is faulty so we need
@@ -81,19 +78,16 @@ def network_diag():
             wifi.blacklist(bssid)
             wifi.reassociate()
             time.sleep(10)
-
     # This state has (theorically) very little chance to be encountered
     # unless wpa_supplicant takes more time than usual to connect to the
     # nearest AP. Or if a diag is performed right when this event occurs
     elif wpa_state == "SCANNING":
         logging.info("wpa_supplicant scanne les AP alentours")
-
     # Like above this has very little chance to happen because this state
     # is usually the result of a manual disconnection
     elif wpa_state == "DISCONNECTED":
         logging.info("Déconnecté du hotspot, reconnexion...")
         wifi.reconnect()
-
     else:
         logging.warning("Exception non gérée")
         logging.debug("status wifi : %s" %wpa_state)
