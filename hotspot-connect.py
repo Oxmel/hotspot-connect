@@ -10,7 +10,7 @@
 #
 # Note that this script uses wpa_supplicant and has originally been made to
 # run on a raspberry pi that is configured to emulate the behavior of a
-# modem-router (see the script called 'pi-modem.sh' in my scripts repo).
+# modem-router (see the script called 'pi-modem.sh' in my 'scripts' repo).
 #
 # In our case, the hotspots 'orange' are used to get an internet connection
 # but the script can work with other providers like 'Free','Neuf', 'Fon',...
@@ -18,8 +18,8 @@
 # probably the only thing that would need to be rewritten.
 #
 # Since a lot of things can go wrong when trying to maintain a connection on
-# that kind of hostpot, the script will regularly check if something goes
-# wrong or if a reauthentification on the captive portal is necessary.
+# that kind of hostpot, the script will regularly check for network errors
+# or if a reauthentication on the captive portal is necessary.
 #
 # The main problems usually come from the APs themselves as the 'orange'
 # hotspots may sometimes fail to give the client an ip address.

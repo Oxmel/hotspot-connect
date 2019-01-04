@@ -13,13 +13,11 @@ import iface
 # This module checks the connection and tries various fixes depending on
 # the connection state as soon as the script detects an internet cut
 #
-# Btw, in a perfect world, if an AP is faulty, all we have to do is to switch
+# Btw, in a perfect world if an AP is faulty, all we have to do is to switch
 # to the next one in range. But from my tests, out of ten 'orange' hotspots
-# in the vicinity, all of them can suddenly break at the same time
-# (understand 'fail to give the client an ip address') and still be broken
-# even after several days. Which suggests that the addressing is not managed
-# independently by each router but centralized elsewhere.
-
+# in the vicinity (same building), all of them can suddenly break at the same
+# time (i.e: fail to give the client an ip address) and still remain
+# broken even after several days.
 
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0"
 test_url = "http://clients3.google.com/generate_204"
@@ -27,18 +25,19 @@ test_url = "http://clients3.google.com/generate_204"
 
 
 # Check if the client has access to the net
+# We use a timeout (in secs) to avoid a long wait in case something
+# goes wrong during the request. We can use a simple value 'timeout=10',
+# or a tuple to set both the connect and read timeouts 'timeout=(10, 10)'
+#
 # Code 0 = internet access
 # Code 1 = request redirected to the captive portal
 # Code 2 = Unable to reach the target (network down)
 #
-# Note : Better use a timeout (in secs) to avoid a long wait in case something
-# goes wrong during the request. We can use a simple value 'timeout=10', or a
-# tuple to set both the connect and read timeouts 'timeout=(10, 10)'
-#
-# But in some very specific cases, when the connection breaks right before the
-# request is sent, the timeout is ignored and the request hangs out until the
-# connection is closed (approx. 5min during my tests but this may vary)
-# So a timeout partially solves the problem, but this still has to be fixed
+# Note: In some very specific cases, when the connection breaks right
+# before the request is sent, the timeout is sometimes ignored.
+# So the request hangs out until the connection is closed (can be long).
+# When this happens, Requests raises a random error depending on the
+# situation, so for now we use a sort of wildcard to catch any error.
 # More info : https://stackoverflow.com/a/22377499
 def network_check():
     try :
