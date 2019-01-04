@@ -19,9 +19,12 @@ import iface
 # time (i.e: fail to give the client an ip address) and still remain
 # broken even after several days.
 
-user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0"
-test_url = "http://clients3.google.com/generate_204"
 
+test_url = "http://clients3.google.com/generate_204"
+headers = {
+    'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:64.0) '
+                   'Gecko/20100101 Firefox/64.0')
+    }
 
 
 # Check if the client has access to the net
@@ -41,7 +44,6 @@ test_url = "http://clients3.google.com/generate_204"
 # More info : https://stackoverflow.com/a/22377499
 def network_check():
     try :
-        headers = { 'user-agent' : user_agent }
         req_test = requests.get(test_url, headers=headers, timeout=(10, 10))
         http_code = req_test.status_code
         if http_code == 204 :
