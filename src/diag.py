@@ -58,8 +58,12 @@ def network_check():
 
 
 
-# Check the connection state and if the client has a valid ip attributed
-# Note that in certain circumstances, especially if the AP is very far
+# Check connection state and if the client has a valid ip attributed
+# If the client doesn't obtain an ip or obtains an ip that starts
+# with '169.254' (depending on the platform) this means the dhcp server
+# of the AP is faulty so we tell wpa_supplicant to find another one.
+#
+# Note: In certain circumstances, especially if the AP is very far
 # away, the connection can be broken even with a valid ip and a
 # connection state that could let us think everything is ok
 def network_diag():
@@ -67,27 +71,17 @@ def network_diag():
     wpa_state = wifi_info["wpa_state"]
     # The bssid is only available if the client is associated with an AP
     if wpa_state == "COMPLETED":
-        bssid = wifi_info["bssid"]
         ip_address = wifi_info.get("ip_address")
-        # If the client obtains an ip address that starts with '169.254'
-        # or if the client doesn't obtain an ip (depending on the platform)
-        # this means the dhcp server of the AP is faulty so we need
-        # to tell wpa_supplicant to ignore it and find another one
+        # Check for Nonetype first to prevent an attribute error
         if ip_address == None or ip_address.startswith("169.254"):
-            logging.warning("AP hors service, changement de hotspot...")
+            logging.info("Faulty AP, looking for another candidate...")
+            bssid = wifi_info["bssid"]
             wifi.blacklist(bssid)
             wifi.reassociate()
             time.sleep(10)
-    # This state has (theorically) very little chance to be encountered
-    # unless wpa_supplicant takes more time than usual to connect to the
-    # nearest AP. Or if a diag is performed right when this event occurs
-    elif wpa_state == "SCANNING":
-        logging.info("wpa_supplicant scanne les AP alentours")
-    # Like above this has very little chance to happen because this state
-    # is usually the result of a manual disconnection
-    elif wpa_state == "DISCONNECTED":
-        logging.info("Déconnecté du hotspot, reconnexion...")
-        wifi.reconnect()
+        else:
+            logging.critical("Unable to fix connection, is AP in range?")
+            exit(1)
     else:
-        logging.warning("Exception non gérée")
-        logging.debug("status wifi : %s" %wpa_state)
+        logging.critical("Unhandled wpa state : %s" %wpa_state)
+        exit(2)
