@@ -39,7 +39,8 @@ def blacklist(arg):
     try:
         subprocess.check_call(cmd, shell=True, stdout=FNULL)
     except subprocess.CalledProcessError as e:
-        logging.error(e)
+        logging.critical(e)
+        sys.exit(1)
 
 
 # Tell wpa_supplicant to associate with any AP in the vicinity
@@ -49,4 +50,5 @@ def reassociate():
     try:
         subprocess.check_call(cmd, shell=True, stdout=FNULL)
     except subprocess.CalledProcessError as e:
-        logging.error(e)
+        logging.critical(e)
+        sys.exit(1)

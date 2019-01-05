@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-import subprocess
 import requests
 import logging
 import time
 import auth
 import wifi
-import iface
+import sys
 
 
 # This module checks the connection and tries various fixes depending on
@@ -44,15 +43,21 @@ headers = {
 # More info : https://stackoverflow.com/a/22377499
 def network_check():
     try :
-        req_test = requests.get(test_url, headers=headers, timeout=(10, 10))
-        http_code = req_test.status_code
+        req = requests.get(test_url, headers=headers, timeout=(10, 10))
+        req.raise_for_status()
+        http_code = req.status_code
         if http_code == 204 :
             return 0
         elif http_code == 200 :
             return 1
         else:
-            print http_code
+            logging.critical("Unhandled HTTP code: %s" %http_code)
+            sys.exit(1)
+    except requests.exceptions.HTTPError as e:
+        logging.critical(e)
+        sys.exit(2)
     except requests.exceptions.RequestException as e:
+        logging.debug("Network unreachable")
         logging.debug(e)
         return 2
 
@@ -81,7 +86,7 @@ def network_diag():
             time.sleep(10)
         else:
             logging.critical("Unable to fix connection, is AP in range?")
-            exit(1)
+            sys.exit(1)
     else:
         logging.critical("Unhandled wpa state : %s" %wpa_state)
-        exit(2)
+        sys.exit(2)

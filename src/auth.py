@@ -5,6 +5,7 @@ import requests
 import json
 import logging
 import diag
+import sys
 
 
 # Those credentials are needed to connect to the captive portal
@@ -60,7 +61,7 @@ def perform_auth():
             req.raise_for_status()
         except requests.exceptions.RequestException as e:
             logging.critical(e)
-            exit(1)
+            sys.exit(1)
 
     # At this point we could assume the authentication is successful
     # as requests didn't raise any error. But it's probably safer to
@@ -69,4 +70,4 @@ def perform_auth():
         logging.info('Connected')
     else:
         logging.critical('Connection failed!')
-        exit(2)
+        sys.exit(2)
