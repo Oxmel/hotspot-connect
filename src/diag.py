@@ -57,7 +57,6 @@ def network_check():
         logging.critical(e)
         sys.exit(2)
     except requests.exceptions.RequestException as e:
-        logging.debug("Network unreachable")
         logging.debug(e)
         return 2
 

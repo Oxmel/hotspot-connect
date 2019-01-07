@@ -74,11 +74,11 @@ logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
 
-logging.info('Lancement du script de monitoring')
+logging.info('Starting connection monitoring')
 
 # Clear the blacklist each time the script starts to avoid the situation
 # where an AP could stay in the bl even if it starts working again
-logging.debug('Clearing the blacklist')
+logging.debug('Clearing wpa_supplicant blacklist')
 wifi.blacklist("clear")
 
 while True :
@@ -86,12 +86,13 @@ while True :
     net_status = diag.network_check()
 
     if net_status == 1 :
-        logging.info('Requête redirigée vers le portail captif')
-        logging.info('Reconnexion en cours...')
+        logging.info('Request redirected to the captive portal')
+        logging.info('Connecting...')
         auth.perform_auth()
 
     elif net_status == 2 :
-        logging.warning('Problème réseau détecté!')
+        logging.warning('Network unreachable!')
+        logging.info('Launching a connection diag...')
         diag.network_diag()
 
     time.sleep(20)
