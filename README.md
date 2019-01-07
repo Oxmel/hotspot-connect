@@ -40,9 +40,6 @@ sur la patte ethernet. Il va également paramétrer les interfaces réseau et
 ajouter des règles iptables pour permettre au trafic de transiter entre wlan0
 et eth0 (ip forwarding).
 
-Redémarrer le Pi. Après redémarrage, dnsmasq devrait automatiquement fournir
-une adresse du type `10.0.0.0/24` au client connecté en ethernet.
-
 Editer le fichier `/etc/wpa_supplicant/wpa_supplicant.conf`
 et ajouter ces lignes pour permettre au Pi de se connecter automatiquement au
 premier point d'accès 'orange' à portée :
@@ -55,6 +52,9 @@ premier point d'accès 'orange' à portée :
 
 Cette méthode permet de déléguer une grosse partie du travail à wpa_supplicant
 qui s'occupera lui-même d'établir et de maintenir le lien avec le hotspot.
+
+Pour finir, redémarrer le Pi. Après redémarrage, dnsmasq devrait fournir
+automatiquement une adresse du type `10.0.0.0/24` au client connecté en ethernet.
 
 ## Installation du script
 
