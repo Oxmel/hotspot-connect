@@ -38,6 +38,8 @@ from src import diag
 from src import auth
 from src import wifi
 
+# Fetch the full path of the script
+cur_path = os.path.dirname(os.path.abspath(__file__))
 
 # Instantiate the logger and set global level to 'Debug'
 # Note that we can set a log level for each handler independently
@@ -50,7 +52,8 @@ logger.setLevel(logging.DEBUG)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 # Create file handler and set logfile name
-file_handler = logging.FileHandler('connect.log')
+# Store log file in the folder 'hotspot-connect'
+file_handler = logging.FileHandler('%s/connect.log' %cur_path)
 file_handler.setLevel(logging.DEBUG)
 
 # Create console handler
