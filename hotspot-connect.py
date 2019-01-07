@@ -10,7 +10,9 @@
 #
 # Note that this script uses wpa_supplicant and has originally been made to
 # run on a raspberry pi that is configured to emulate the behavior of a
-# modem-router (see the script called 'pi-modem.sh' in my 'scripts' repo).
+# modem-router.
+# See 'pi-modem-router.sh' for more info :
+# https://github.com/Oxmel/scripts/blob/master/pi-modem-router.sh
 #
 # In our case, the hotspots 'orange' are used to get an internet connection
 # but the script can work with other providers like 'Free','Neuf', 'Fon',...
