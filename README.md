@@ -60,7 +60,7 @@ automatiquement une adresse du type `10.0.0.0/24` au client connecté en etherne
 
 Installer tout d'abord les dépendances et programmes nécessaires :
 
-`$sudo apt-get update`
+`$sudo apt-get update`    
 `$sudo apt-get install python-requests git`
 
 Cloner le repo 'hotspot-connect' et se placer dans le dossier :
