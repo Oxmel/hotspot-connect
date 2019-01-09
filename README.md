@@ -58,11 +58,15 @@ automatiquement une adresse du type `10.0.0.0/24` au client connecté en etherne
 
 ## Installation du script
 
-Cloner le repo 'hotspot-connect' et installer les dépendances :
+Installer tout d'abord les dépendances et programmes nécessaires :
+
+`$sudo apt-get update`
+`$sudo apt-get install python-requests git`
+
+Cloner le repo 'hotspot-connect' et se placer dans le dossier :
 
 `$git clone https://github.com/Oxmel/hotspot-connect.git`    
 `$cd hotspot-connect`    
-`$pip install -r requirements.txt`
 
 Editer le module `auth.py` dans le dossier `src` et renseigner ses identifiants
 orange (adresse mail ou numéro de mobile) ainsi que son mot de passe.
