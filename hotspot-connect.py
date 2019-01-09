@@ -47,7 +47,7 @@ cur_path = os.path.dirname(os.path.abspath(__file__))
 # Note that we can set a log level for each handler independently
 # e.g : 'DEBUG' for logfile and 'WARNING' for console (stdout)
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 # By default, any new HTTP connection started by urllib3 is logged as 'INFO'
 # So we set log level to 'WARNING' as we don't need those lines
@@ -56,11 +56,11 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 # Create file handler and set logfile name
 # Store log file in the folder 'hotspot-connect'
 file_handler = logging.FileHandler('%s/connect.log' %cur_path)
-file_handler.setLevel(logging.DEBUG)
+file_handler.setLevel(logging.INFO)
 
 # Create console handler
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
+console_handler.setLevel(logging.INFO)
 
 # Create formatter and set a custom datetime format (day/month/year)
 formatter = logging.Formatter('%(asctime)s - [%(levelname)s]: %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
