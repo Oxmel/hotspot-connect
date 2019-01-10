@@ -43,9 +43,9 @@ from src import wifi
 # Fetch the full path of the script
 cur_path = os.path.dirname(os.path.abspath(__file__))
 
-# Instantiate the logger and set global level to 'Debug'
+# Instantiate the logger and set global level to 'INFO'
 # Note that we can set a log level for each handler independently
-# e.g : 'DEBUG' for logfile and 'WARNING' for console (stdout)
+# e.g : 'INFO' for logfile and 'DEBUG' for console (stdout)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
