@@ -1,4 +1,4 @@
-## Avant-propos
+## Description
 
 Ce script est un prototype destiné à démontrer qu'il est techniquement
 possible de transformer un hotspot 'orange' en accès internet sédentaire avec
@@ -23,7 +23,7 @@ nombre de hotspots à portée.
 ## Prérequis
 
 - Un raspberry pi sous Raspbian et ses accessoires (chargeur, carte SD,...)
-- Un dongle wifi, ou le wifi intégré au raspberry (Pi 3 et Pi zero v1.3)
+- Un dongle wifi, ou le wifi intégré au raspberry (Pi 3 et Pi Zero W)
 - Un câble ethernet
 - Des identifiants orange pour pouvoir se connecter au hotspot
 
