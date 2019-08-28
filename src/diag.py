@@ -42,24 +42,33 @@ headers = {
 # situation, so for now we use a sort of wildcard to catch any error.
 # More info : https://stackoverflow.com/a/22377499
 def network_check():
-    try :
-        req = requests.get(test_url, headers=headers, timeout=(10, 10))
-        req.raise_for_status()
-        http_code = req.status_code
-        if http_code == 204 :
-            return 0
-        elif http_code == 200 :
-            return 1
-        else:
-            logging.critical("Unhandled HTTP code: %s" %http_code)
-            sys.exit(1)
-    except requests.exceptions.HTTPError as e:
-        logging.critical(e)
-        sys.exit(2)
-    except requests.exceptions.RequestException as e:
-        logging.debug(e)
-        return 2
-
+    # Retry if network is temporarily unstable
+    # https://stackoverflow.com/a/34885906
+    for i in range(1, 5):
+        try :
+            req = requests.get(test_url, headers=headers, timeout=(10, 10))
+            req.raise_for_status()
+            http_code = req.status_code
+            if http_code == 204 :
+                return 0
+            elif http_code == 200 :
+                return 1
+            else:
+                logging.critical("Unhandled HTTP code: %s" %http_code)
+                sys.exit(1)
+        except requests.exceptions.HTTPError as e:
+            logging.critical(e)
+            sys.exit(2)
+        except requests.exceptions.RequestException as e:
+            logging.debug(e)
+            # Retry 3 times before performing a network diag
+            if i < 4:
+                logging.debug("Target url unreachable, retrying (%s/3)" %i)
+                time.sleep(3)
+                continue
+            else:
+                logging.debug("Unable to reach target url after 3 tries")
+                return 2
 
 
 # Check connection state and if the client has a valid ip attributed
