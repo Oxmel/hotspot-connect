@@ -34,8 +34,8 @@ Editer le module `auth.py` dans le dossier `hotspot-connect/src` et
 renseigner son identifiant orange (adresse mail ou numéro de mobile)
 ainsi que son mot de passe :
 
-    username = 0601020304
-    password = mot_de_passe
+    username = '0601020304'
+    password = 'mot_de_passe'
 
 **Attention!** Les identifiants sont pour l'instant stockés en clair,
 donc à utiliser à vos risques et périls.
