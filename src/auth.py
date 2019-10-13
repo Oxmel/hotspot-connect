@@ -8,18 +8,21 @@ import diag
 import sys
 
 
-# Those credentials are needed to connect to the captive portal
+
+# These credentials are needed to connect to the captive portal
 # The username is either a phone number or a mail address
 username = ''
 password = ''
 
-# Humanize the script by using a 'standard' user-agent in the header
-headers = {
-    'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:64.0) '
-                   'Gecko/20100101 Firefox/64.0')
-    }
 
-# Gotta find a way to store those infos in a more readable fashion
+
+# Humanize the script by using a 'standard' user-agent
+headers = {
+    'user-agent': (
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:64.0) '
+        'Gecko/20100101 Firefox/64.0')
+}
+
 auth_data = [
     {
         'method': 'GET',
@@ -46,26 +49,29 @@ auth_data = [
     }
 ]
 
-# Requests will raise an exception for any HTTP error (4xx, 5xx)
-# We also catch any other exception like timeout, connection error,...
-# http://docs.python-requests.org/en/master/api/?highlight=exceptions
+
 def perform_auth():
+
     session = requests.Session()
+
     for item in auth_data:
         method = item['method']
         url = item['url']
         payload = json.dumps(item.get('payload'))
+
         try:
-            req = session.request(method, url, data=payload,
-                                  headers=headers, timeout=(10, 10))
+            req = session.request(
+                    method, url, data=payload,
+                    headers=headers, timeout=(10, 10))
+            # Exception raised in case of http error (4xx, 5xx,...)
             req.raise_for_status()
+
+        # Catch any exception like http error, connection error,...
         except requests.exceptions.RequestException as e:
             logging.critical(e)
             sys.exit(1)
 
-    # At this point we could assume the authentication is successful
-    # as requests didn't raise any error. But it's probably safer to
-    # manually check if internet is reachable to have a confirmation
+    # Check if the authentication is successful
     if diag.network_check() == 0:
         logging.info('Connected')
     else:
