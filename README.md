@@ -77,13 +77,14 @@ connecté en ethernet.
 Une fois les étapes précédentes terminées, tester une première fois le script
 à la main pour vérifier s'il n'y a pas d'erreurs :
 
-    sudo python hotspot-connect.py
+    $ python hotspot-connect.py
 
 Et si tout va bien, on peut ajouter un cronjob pour lancer
 le script à chaque démarrage :
 
-    $ sudo crontab -e
+    $ crontab -e
     @reboot python /chemin-vers-le-script/hotspot-connect.py
+
 
 ## Debugging
 
