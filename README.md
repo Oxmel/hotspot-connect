@@ -1,4 +1,4 @@
-## Description
+## Hotspot Connect v0.1
 
 Ce script est un prototype permettant de transformer un hotspot *orange* en
 accès internet sédentaire avec l'aide d'un raspberry pi. Le but étant d'avoir
