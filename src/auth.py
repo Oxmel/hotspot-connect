@@ -49,6 +49,7 @@ auth_data = [
     }
 ]
 
+diag = diag.DiagTools()
 
 def perform_auth():
 
@@ -73,7 +74,7 @@ def perform_auth():
 
     # Check if the authentication is successful
     if diag.network_check() == 0:
-        logging.info('Connected')
+        logging.info('Authentication successfull')
     else:
-        logging.critical('Connection failed!')
-        sys.exit(2)
+        logging.critical('Authentication failed!')
+        sys.exit(1)
