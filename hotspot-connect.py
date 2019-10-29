@@ -30,6 +30,7 @@ from src import diag, auth, wifi
 import logging
 import time
 import os
+import sys
 
 
 # Fetch the path of the current file
@@ -66,27 +67,80 @@ logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
 
-# Clear the blacklist each time the script starts to avoid the situation
-# where an AP could stay in the bl even if it starts working again
-logging.debug('Clearing wpa_supplicant blacklist')
-wifi.blacklist("clear")
+# Greeting message
+logging.info('Hotspot Connect - v0.x')
+
+wifi = wifi.WifiTools()
+diag = diag.DiagTools()
+
+# Connect to wpa_supplicant control socket
+wifi.wpa_control()
+
+# Disconnect the wireless interface and remove existing networks
+wifi.disconnect()
+wifi.remove_networks()
+
+# Scan for available hotspots in the area
+logging.info("Looking for 'orange' hotspots...")
+
+ap_list = wifi.scan()
+
+if ap_list == []:
+    logging.critical("No candidate found in the area!")
+    sys.exit(1)
+
+ap_count = len(ap_list)
+logging.info("Found %s candidate(s) in the area" %ap_count)
+logging.debug("List of available APs : %s" %ap_list)
+
+# Configure network profile an return its id
+net_id = wifi.set_network()
+
+# Connect to the nearest hotspot
+wifi.associate(net_id)
+
+logging.info("Association in progress...")
+time.sleep(30)
+
+wifi_info = wifi.status()
+wpa_state = wifi_info['wpa_state']
+
+if wpa_state != 'COMPLETED':
+    logging.critical("Association failed!")
+    sys.exit(1)
+
+bssid = wifi_info['bssid']
+signal = wifi.signal_strength()
+
+logging.info("Association successfull :-)")
+logging.info("bssid  : %s" %bssid)
+logging.info("signal : -%s dBm" %signal)
+
+# Display this message (only once) when internet is back
+# Way of saying that everything is ok
+service_msg = True
 
 
-logging.info('Starting connection monitoring')
-
-
-while True :
+while True:
 
     net_status = diag.network_check()
 
-    if net_status == 1 :
-        logging.info('Request redirected to the captive portal')
-        logging.info('Connecting...')
+    if net_status == 0:
+        if service_msg:
+            logging.info("Network monitoring enabled")
+            service_msg = False
+
+        time.sleep(20)
+        continue
+
+    service_msg = True
+
+    if net_status == 1:
+        logging.info('Authentication required on the captive portal')
+        logging.info("Sending credentials...")
         auth.perform_auth()
 
-    elif net_status == 2 :
-        logging.warning('Network unreachable!')
+    if net_status == 2:
+        logging.error('Network unreachable!')
         logging.info('Launching a connection diag...')
         diag.network_diag()
-
-    time.sleep(20)
