@@ -1,4 +1,4 @@
-## Hotspot Connect - v0.2
+## Hotspot Connect - v0.2.1
 
 Automatise le processus de connexion sur un hotspot *orange*.
 
