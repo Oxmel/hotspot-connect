@@ -164,8 +164,10 @@ class DiagTools():
         """Manually choose which AP to use."""
 
         wifi.disconnect()
-        time.sleep(1)
-        avail_ap = wifi.scan()
+        wifi.scan()
+
+        time.sleep(5)
+        avail_ap = wifi.scan_results()
 
         logging.debug("List of available ap : %s" %avail_ap)
         logging.debug("List of faulty ap : %s" %self.faulty_ap)
@@ -221,9 +223,7 @@ class DiagTools():
         """Give back control to wpa_supplicant."""
 
         wifi.remove_networks()
-        time.sleep(1)
         net_id = wifi.set_network()
-        time.sleep(1)
 
         logging.info("Associating with the nearest AP...")
         wifi.associate(net_id)

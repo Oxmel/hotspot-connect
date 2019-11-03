@@ -71,41 +71,34 @@ class WifiTools():
 
     def scan(self):
         """
-        Look for avail candidates in the area and return their bssid.
+        Trigger a scan to manually update scan_results.
 
-        Note: Scans often return inconsistent results and sometimes
-        no results at all even if there are available hotspots in the
-        area. Unfortunately, this has nothing to do with wpa_supplicant
-        and seems to be more related to the wireless driver used by
-        default on Raspbian (nl80211n). The easiest workaround consists
-        of performing x scans in a row to reduce the occurence of
-        inaccurate results, but this doesn't completely fix the issue.
+        Note: Keep in mind that wpa_supplicant already triggers
+        scans on a regular basis (every 60s on Linux). A scan is
+        also triggered when the interface is disconnected.
         """
+
+        self.send_cmd('SCAN')
+
+    def scan_results(self):
+        """Look for avail. candidates and return their bssid."""
 
         self.ap_list = []
 
-        # Sleep 1s between each command to avoid a 'FAIL/BUSY' error.
-        for i in range(3):
+        scan_results = self.send_cmd('SCAN_RESULTS', True)
+        # Each line becomes a list element (ignore 1st line)
+        scan_results = scan_results.split('\n')[1:]
 
-            self.send_cmd('SCAN')
-            time.sleep(1)
-            scan_results = self.send_cmd('SCAN_RESULTS', True)
+        for result in scan_results:
+            # Each AP info becomes a list element
+            # e.g. ['bssid', 'frequency', signal', 'flags', 'essid']
+            ap_info = result.split('\t')
 
-            # Each line becomes a list element (ignore 1st line)
-            scan_results = scan_results.split('\n')[1:]
-
-            for result in scan_results:
-                # Each AP info becomes a list element
-                # e.g. ['bssid', 'frequency', signal', 'flags', 'essid']
-                ap_info = result.split('\t')
-
-                # Ignore blank results and results with hidden ssid
-                if len(ap_info) == 5 and ap_info[4] == "orange":
-                    bssid = ap_info[0]
-                    if bssid not in self.ap_list:
-                        self.ap_list.append(bssid)
-
-            time.sleep(1)
+            # Ignore blank results and results with hidden ssid
+            if len(ap_info) == 5 and ap_info[4] == "orange":
+                bssid = ap_info[0]
+                if bssid not in self.ap_list:
+                    self.ap_list.append(bssid)
 
         return self.ap_list
 
