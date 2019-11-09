@@ -5,7 +5,7 @@
 
 """
 
-                        Hotspot Connect v0.2.1
+                        Hotspot Connect v0.2.2
 
     Automate the association/authentication process on hotspots of
     the french internet provider 'orange' and keep the connection alive.
@@ -68,7 +68,7 @@ logger.addHandler(file_handler)
 
 
 # Greeting message
-logging.info('Hotspot Connect - v0.2.1')
+logging.info('Hotspot Connect - v0.2.2')
 
 wifi = wifi.WifiTools()
 diag = diag.DiagTools()
