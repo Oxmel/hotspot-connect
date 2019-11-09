@@ -120,42 +120,41 @@ class DiagTools():
         for i in range(2):
 
             wifi_info = wifi.status()
-
             wpa_state = wifi_info['wpa_state']
-            logging.debug("wpa_state : %s" %wpa_state)
+            # Return 'None' if no bssid or ip address
+            bssid = wifi_info.get('bssid')
+            ip = wifi_info.get('ip_address')
 
-            if wpa_state != "COMPLETED":
+            if i == 0:
 
-                if i == 0:
-                    logging.warning("The connection with the hotspot has been lost!")
-                    logging.info("Reassociating...")
+                if wpa_state != "COMPLETED":
+                    logging.warning("Lost association with the hotspot!")
+                    logging.info("Trying to reassociate...")
                     wifi.reassociate()
                     time.sleep(30)
                     continue
 
-                logging.warning("Association failed!")
-                break
-
-            bssid = wifi_info['bssid']
-            logging.debug("bssid : %s" %bssid)
-
-            ip_addr = wifi_info.get("ip_address")
-            logging.debug("ip address : %s" %ip_addr)
-
-            if ip_addr == None or ip_addr.startswith("169.254"):
-
-                if i == 0:
+                if ip == None or ip.startswith("169.254"):
                     logging.warning("The current ip address is invalid")
                     logging.info("Trying to obtain a valid ip...")
                     wifi.reattach()
                     time.sleep(20)
                     continue
 
-                logging.warning("Unable to obtain a valid ip!")
-                self.faulty_ap.append(bssid)
+                # Sometimes, like for instance when the signal is too weak,
+                # the connection can be broken even if everything seems ok.
                 break
 
+            if wpa_state == "COMPLETED" and ip and ip.startswith("10."):
+                    logging.info("Everything seems back to normal")
+                    return
+
+            logging.warning("Unable to fix the connection!")
             break
+
+        if bssid:
+            logging.info("The current hotspot seems faulty, blacklisting.")
+            self.faulty_ap.append(bssid)
 
         logging.info("Looking for another candidate...")
         self.manual_mode()
