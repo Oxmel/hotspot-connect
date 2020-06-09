@@ -1,5 +1,11 @@
 ## Hotspot Connect - v0.2.2
 
+<br/>
+
+**Note :** Orange a récemment mis à jour sa page d'authentification login.orange.fr avec un nouveau mécanisme de sécurité qui rend désormais cette application inutilisable. Plus d'infos ici : https://github.com/Oxmel/hotspot-connect/issues/7
+
+<br/>
+
 Automatise le processus de connexion sur un hotspot *orange*.
 
 Le but ici est de transformer un hotspot *orange* en accès internet
