@@ -2,7 +2,7 @@
 
 <br/>
 
-**Note :** Orange a récemment mis à jour sa page d'authentification login.orange.fr avec un nouveau mécanisme de sécurité qui rend désormais cette application inutilisable. Plus d'infos ici : https://github.com/Oxmel/hotspot-connect/issues/7
+**Note :** Orange a récemment mis à jour sa page d'authentification login.orange.fr avec un nouveau mécanisme de sécurité qui rend pour l'instant cette application inutilisable. Cependant, une solution semble exister pour contourner le problème et si tout va bien, un fix devrait pouvoir être mis en oeuvre assez rapidement. Plus d'infos ici : https://github.com/Oxmel/hotspot-connect/issues/7
 
 <br/>
 
