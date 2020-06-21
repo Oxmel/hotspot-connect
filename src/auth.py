@@ -6,48 +6,61 @@ import json
 import logging
 import diag
 import sys
-
+import re
 
 
 # These credentials are needed to connect to the captive portal
-# The username is either a phone number or a mail address
-username = ''
+# The login is either a mobile phone number or an email address
+login = ''
 password = ''
 
 
+auth_data = {
 
-# Humanize the script by using a 'standard' user-agent
-headers = {
-    'user-agent': (
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:64.0) '
-        'Gecko/20100101 Firefox/64.0')
+    'url': {
+        'pre-auth': 'https://sso.orange.fr/WT/userinfo/',
+        'post-auth': 'https://hautdebitmobile.orange.fr:8443/wificom/logon'
+    },
+
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 5.1; Google Build/LMY47D)",
+        "Accept": "*/*",
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+    },
+
+    'payload': {
+        'serv': 'WIFIOO',
+        'info': 'cooses',
+        'wt-msisdn': login,
+        'wt-pwd': password,
+        'wt-cvt': '4',
+        'wt-mco': 'MCO=OFR'
+    },
+
+    'cookies': {
+        'wassup': None
+    },
+
+    'params': {
+        'lang': 'fr',
+        'version': 'V2'
+    }
 }
 
-auth_data = [
-    {
-        'method': 'GET',
-        'url': 'https://login.orange.fr'
-    },
-    {
-        'method': 'POST',
-        'url': 'https://login.orange.fr/front/login',
-        'payload': {'login': username, 'mem': 'true'}
-    },
-    {
-        'method': 'POST',
-        'url': 'https://login.orange.fr/front/password',
-        'payload': {'login': username, 'password': password}
-    },
-    {
-        'method': 'GET',
-        'url': 'https://hautdebitmobile.orange.fr:8443/home'
-    },
-    {
-        'method': 'GET',
-        'url': 'https://hautdebitmobile.orange.fr:8443/home/wassup',
-        'payload': {'isCgu': 'on', 'doCheckCgu': '1'}
-    }
-]
+
+# Switch key name depending on the type of credential (email or phone n°)
+if "@orange.fr" in login:
+    auth_data['payload']['wt-email'] = auth_data['payload']['wt-msisdn']
+    del auth_data['payload']['wt-msisdn']
+
+
+def extract_cookie(req):
+    result = re.search(r'value="(.*)"', req)
+    cookie_value = result.group(1)
+    auth_data['cookies']['wassup'] = cookie_value
+
 
 diag = diag.DiagTools()
 
@@ -55,24 +68,27 @@ def perform_auth():
 
     session = requests.Session()
 
-    for item in auth_data:
-        method = item['method']
-        url = item['url']
-        payload = json.dumps(item.get('payload'))
+    try:
+        url = auth_data['url']['pre-auth']
+        headers = auth_data['headers']
+        payload = auth_data['payload']
+        pre_auth = session.post(url, headers=headers, data=payload, timeout=(10, 10))
+        pre_auth.raise_for_status()
 
-        try:
-            req = session.request(
-                    method, url, data=payload,
-                    headers=headers, timeout=(10, 10))
-            # Exception raised in case of http error (4xx, 5xx,...)
-            req.raise_for_status()
+        extract_cookie(pre_auth.text)
 
-        # Catch any exception like http error, connection error,...
-        except requests.exceptions.RequestException as e:
-            logging.critical(e)
-            sys.exit(1)
+        url = auth_data['url']['post-auth']
+        params = auth_data['params']
+        cookies = auth_data['cookies']
+        post_auth = requests.post(url, headers=headers, params=params, cookies=cookies, timeout=(10, 10))
+        post_auth.raise_for_status()
 
-    # Check if the authentication is successful
+    # Catch any exception like http error, connection error,...
+    except requests.exceptions.RequestException as e:
+        logging.critical(e)
+        sys.exit(1)
+
+    # Check if authentication is successful
     if diag.network_check() == 0:
         logging.info('Authentication successfull')
     else:
