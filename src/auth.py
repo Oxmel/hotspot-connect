@@ -65,7 +65,8 @@ if '@orange.fr' in login:
 def grab_cookie():
     url = 'https://sso.orange.fr/WT/userinfo/'
     try:
-        req = requests.post(url, headers=headers, data=payload, timeout=(10, 10))
+        req = requests.post(url, headers=headers, data=payload,
+              timeout=(10, 10))
         req.raise_for_status()
     # Catch any exceptions like HTTP errors, connection errors,...
     except requests.exceptions.RequestException as e:
@@ -110,7 +111,8 @@ def perform_auth():
         url = 'https://hautdebitmobile.orange.fr:8443/wificom/logon'
         cookies = { 'wassup': cookie_value }
         try:
-            req = requests.post(url, headers=headers, params=params, cookies=cookies, timeout=(10, 10))
+            req = requests.post(url, headers=headers, params=params,
+                  cookies=cookies, timeout=(10, 10))
             req.raise_for_status()
         # Catch any exception like http error, connection error,...
         except requests.exceptions.RequestException as e:
