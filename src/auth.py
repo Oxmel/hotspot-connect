@@ -127,10 +127,9 @@ def perform_auth():
             logging.debug('Authentication refused, renewing cookie...')
             grab_cookie()
             continue
-        break
 
-    logging.critical('Failed to authenticate on the captive portal!')
-    sys.exit(1)
+        logging.critical('Failed to authenticate on the captive portal!')
+        sys.exit(1)
 
 
 # '50' means login success, '100' means login failed
