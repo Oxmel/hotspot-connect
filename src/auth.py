@@ -2,12 +2,10 @@
 # -*- coding: UTF-8 -*-
 
 import requests
-import json
 import logging
-import diag
 import sys
 import re
-
+import os
 
 # These credentials are needed to connect to the captive portal
 # The login is either a mobile phone number or an email address
@@ -15,82 +13,127 @@ login = ''
 password = ''
 
 
-auth_data = {
+"""
+    Authenticate the user on the hotspot's captive portal.
 
-    'url': {
-        'pre-auth': 'https://sso.orange.fr/WT/userinfo/',
-        'post-auth': 'https://hautdebitmobile.orange.fr:8443/wificom/logon'
-    },
+    This procedure requires two steps. Firstly we need to send the user's
+    credentials at the url 'sso.orange.fr/WT/userinfo'. We then grab the
+    cookie returned by the server and use it to authenticate the user on
+    the captive portal at 'hautdebitmobile.orange.fr:8443/wificom/logon'
 
-    'headers': {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 5.1; Google Build/LMY47D)",
-        "Accept": "*/*",
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-    },
+    Note that the user needs to reauthenticate on the captive portal on
+    a regular basis, usually every 12 hours. But the cookie keeps being
+    valid for couple days so we can reuse it several times before having
+    to get a new one.
 
-    'payload': {
-        'serv': 'WIFIOO',
-        'info': 'cooses',
-        'wt-msisdn': login,
-        'wt-pwd': password,
-        'wt-cvt': '4',
-        'wt-mco': 'MCO=OFR'
-    },
+    Special thanks to @ng-pe for his researches and advices that helped me
+    tremendously finding and implementing this new authentication method :-)
+"""
 
-    'cookies': {
-        'wassup': None
-    },
 
-    'params': {
-        'lang': 'fr',
-        'version': 'V2'
-    }
+headers = {
+    "Content-Type": "application/x-www-form-urlencoded",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 5.1; Google Build/LMY47D)",
+    "Accept": "*/*",
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
 }
 
+payload = {
+    'serv': 'WIFIOO',
+    'info': 'cooses',
+    'wt-msisdn': login,
+    'wt-pwd': password,
+    'wt-cvt': '4',
+    'wt-mco': 'MCO=OFR'
+}
+
+params = {
+    'lang': 'fr',
+    'version': 'V2'
+}
+
+# Cookie file stored in the root folder of the script
+cookie_file = os.path.abspath('.cookie')
 
 # Switch key name depending on the type of credential (email or phone n°)
 if "@orange.fr" in login:
-    auth_data['payload']['wt-email'] = auth_data['payload']['wt-msisdn']
-    del auth_data['payload']['wt-msisdn']
+    payload['wt-email'] = payload['wt-msisdn']
+    del payload['wt-msisdn']
 
 
-def extract_cookie(req):
-    result = re.search(r'value="(.*)"', req)
-    cookie_value = result.group(1)
-    auth_data['cookies']['wassup'] = cookie_value
+def grab_cookie():
+    url = 'https://sso.orange.fr/WT/userinfo/'
+    try:
+        req = requests.post(url, headers=headers, data=payload, timeout=(10, 10))
+        req.raise_for_status()
+    # Catch any other exceptions like HTTP errors, connection errors,...
+    except requests.exceptions.RequestException as e:
+        if e.response != None and e.response.status_code == 403:
+            logging.critical("Logon failed! Wrong login or password")
+        else:
+            logging.critical(e)
+        sys.exit(1)
+
+    cookie_value = extract_cookie(req.text)
+    save_cookie(cookie_value)
 
 
-diag = diag.DiagTools()
+def extract_cookie(raw_data):
+    result = re.search(r'value="(.*)"', raw_data)
+    try:
+        cookie_value = result.group(1)
+        return cookie_value
+    except AttributeError:
+        logging.critical("Failed to obtain a valid cookie!")
+        sys.exit(1)
+
+
+def save_cookie(cookie_value):
+    with open(cookie_file, 'w') as cf:
+       cf.write(cookie_value)
+
+
+def load_cookie():
+    with open(cookie_file, 'r') as cf:
+        return cf.read().strip()
+
 
 def perform_auth():
+    if not os.path.exists(cookie_file):
+        logging.debug("Cookie file not present, creating...")
+        grab_cookie()
 
-    session = requests.Session()
+    for i in range(2):
+        cookie_value = load_cookie()
+        url = 'https://hautdebitmobile.orange.fr:8443/wificom/logon'
+        cookies = { 'wassup': cookie_value }
+        try:
+            req = requests.post(url, headers=headers, params=params, cookies=cookies, timeout=(10, 10))
+            req.raise_for_status()
+        # Catch any exception like http error, connection error,...
+        except requests.exceptions.RequestException as e:
+            logging.critical(e)
+            sys.exit(1)
 
-    try:
-        url = auth_data['url']['pre-auth']
-        headers = auth_data['headers']
-        payload = auth_data['payload']
-        pre_auth = session.post(url, headers=headers, data=payload, timeout=(10, 10))
-        pre_auth.raise_for_status()
+        auth_status = check_auth(req.text)
+        if auth_status:
+            logging.info("Authentication successfull!")
+            return
+        if i == 0:
+            logging.debug("Authentication refused, renewing cookie...")
+            grab_cookie()
+            continue
+        break
 
-        extract_cookie(pre_auth.text)
+    logging.critical("Failed to authenticate on the captive portal!")
+    sys.exit(1)
 
-        url = auth_data['url']['post-auth']
-        params = auth_data['params']
-        cookies = auth_data['cookies']
-        post_auth = requests.post(url, headers=headers, params=params, cookies=cookies, timeout=(10, 10))
-        post_auth.raise_for_status()
 
-    # Catch any exception like http error, connection error,...
-    except requests.exceptions.RequestException as e:
-        logging.critical(e)
-        sys.exit(1)
-
-    # Check if authentication is successful
-    if diag.network_check() == 0:
-        logging.info('Authentication successfull')
-    else:
-        logging.critical('Authentication failed!')
-        sys.exit(1)
+# "50" means login success, "100" means login failed
+def check_auth(raw_data):
+    result = re.search(r'<ResponseCode>(.*)</ResponseCode>', raw_data)
+    response_code = result.group(1)
+    if response_code == "50":
+        return True
+    return False
