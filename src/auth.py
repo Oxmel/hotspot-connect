@@ -32,9 +32,9 @@ password = ''
 
 
 headers = {
-    "Content-Type": "application/x-www-form-urlencoded",
-    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 5.1; Google Build/LMY47D)",
-    "Accept": "*/*",
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 5.1; Google Build/LMY47D)',
+    'Accept': '*/*',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive'
 }
@@ -57,7 +57,7 @@ params = {
 cookie_file = os.path.abspath('.cookie')
 
 # Switch key name depending on the type of credential (email or phone n°)
-if "@orange.fr" in login:
+if '@orange.fr' in login:
     payload['wt-email'] = payload['wt-msisdn']
     del payload['wt-msisdn']
 
@@ -70,7 +70,7 @@ def grab_cookie():
     # Catch any exceptions like HTTP errors, connection errors,...
     except requests.exceptions.RequestException as e:
         if e.response != None and e.response.status_code == 403:
-            logging.critical("Logon failed! Wrong login or password")
+            logging.critical('Logon failed! Wrong login or password')
         else:
             logging.critical(e)
         sys.exit(1)
@@ -85,7 +85,7 @@ def extract_cookie(raw_data):
         cookie_value = result.group(1)
         return cookie_value
     except AttributeError:
-        logging.critical("Failed to obtain a valid cookie!")
+        logging.critical('Failed to obtain a valid cookie!')
         sys.exit(1)
 
 
@@ -101,7 +101,7 @@ def load_cookie():
 
 def perform_auth():
     if not os.path.exists(cookie_file):
-        logging.debug("Cookie file not present, creating...")
+        logging.debug('Cookie file not present, creating...')
         grab_cookie()
 
     # Grab a new cookie and retry if the 1st attempt fails
@@ -119,22 +119,22 @@ def perform_auth():
 
         auth_status = check_auth(req.text)
         if auth_status:
-            logging.info("Authentication successfull!")
+            logging.info('Authentication successfull!')
             return
         if i == 0:
-            logging.debug("Authentication refused, renewing cookie...")
+            logging.debug('Authentication refused, renewing cookie...')
             grab_cookie()
             continue
         break
 
-    logging.critical("Failed to authenticate on the captive portal!")
+    logging.critical('Failed to authenticate on the captive portal!')
     sys.exit(1)
 
 
-# "50" means login success, "100" means login failed
+# '50' means login success, '100' means login failed
 def check_auth(raw_data):
     result = re.search(r'<ResponseCode>(.*)</ResponseCode>', raw_data)
     response_code = result.group(1)
-    if response_code == "50":
+    if response_code == '50':
         return True
     return False
