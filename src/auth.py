@@ -71,7 +71,7 @@ def grab_cookie():
     # Catch any exceptions like HTTP errors, connection errors,...
     except requests.exceptions.RequestException as e:
         if e.response != None and e.response.status_code == 403:
-            logging.critical('Logon failed! Wrong login or password')
+            logging.critical('Login failed: wrong n°/email or password')
         else:
             logging.critical(e)
         sys.exit(1)
@@ -86,7 +86,7 @@ def extract_cookie(raw_data):
         cookie_value = result.group(1)
         return cookie_value
     except AttributeError:
-        logging.critical('Failed to obtain a valid cookie!')
+        logging.critical('Unable to obtain a valid cookie!')
         sys.exit(1)
 
 
@@ -102,7 +102,7 @@ def load_cookie():
 
 def perform_auth():
     if not os.path.exists(cookie_file):
-        logging.debug('Cookie file not present, creating...')
+        logging.debug('Cookie file not found, creating...')
         grab_cookie()
 
     # Grab a new cookie and retry if the 1st attempt fails
@@ -128,7 +128,7 @@ def perform_auth():
             grab_cookie()
             continue
 
-        logging.critical('Failed to authenticate on the captive portal!')
+        logging.critical('Login failed: invalid cookie')
         sys.exit(1)
 
 
