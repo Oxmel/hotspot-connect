@@ -67,7 +67,7 @@ def grab_cookie():
     try:
         req = requests.post(url, headers=headers, data=payload, timeout=(10, 10))
         req.raise_for_status()
-    # Catch any other exceptions like HTTP errors, connection errors,...
+    # Catch any exceptions like HTTP errors, connection errors,...
     except requests.exceptions.RequestException as e:
         if e.response != None and e.response.status_code == 403:
             logging.critical("Logon failed! Wrong login or password")
@@ -104,6 +104,7 @@ def perform_auth():
         logging.debug("Cookie file not present, creating...")
         grab_cookie()
 
+    # Grab a new cookie and retry if the 1st attempt fails
     for i in range(2):
         cookie_value = load_cookie()
         url = 'https://hautdebitmobile.orange.fr:8443/wificom/logon'
