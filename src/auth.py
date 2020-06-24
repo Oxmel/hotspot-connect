@@ -81,6 +81,7 @@ def grab_cookie():
 
 
 def extract_cookie(raw_data):
+    logging.debug('Extracting cookie value')
     result = re.search(r'value="(.*)"', raw_data)
     try:
         cookie_value = result.group(1)
@@ -91,11 +92,13 @@ def extract_cookie(raw_data):
 
 
 def save_cookie(cookie_value):
+    logging.debug('Writing cookie file ' + cookie_file)
     with open(cookie_file, 'w') as cf:
        cf.write(cookie_value)
 
 
 def load_cookie():
+    logging.debug('Loading cookie file ' + cookie_file)
     with open(cookie_file, 'r') as cf:
         return cf.read().strip()
 
@@ -136,6 +139,7 @@ def perform_auth():
 def check_auth(raw_data):
     result = re.search(r'<ResponseCode>(.*)</ResponseCode>', raw_data)
     response_code = result.group(1)
+    logging.debug('Response code : ' + response_code)
     if response_code == '50':
         return True
     return False
