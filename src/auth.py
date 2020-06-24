@@ -70,7 +70,7 @@ def grab_cookie():
         req.raise_for_status()
     # Catch any exceptions like HTTP errors, connection errors,...
     except requests.exceptions.RequestException as e:
-        if e.response != None and e.response.status_code == 403:
+        if e.response is not None and e.response.status_code == 403:
             logging.critical('Login failed: wrong n°/email or password')
         else:
             logging.critical(e)
