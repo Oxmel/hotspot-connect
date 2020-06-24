@@ -53,8 +53,8 @@ params = {
     'version': 'V2'
 }
 
-# Cookie file stored in the root folder of the script
-cookie_file = os.path.abspath('.cookie')
+# Store cookie file '.cookie' in the root folder of the script
+cookie_file = os.path.abspath(__file__ + '/../../.cookie')
 
 # Switch key name depending on the type of credential (email or phone n°)
 if '@orange.fr' in login:
