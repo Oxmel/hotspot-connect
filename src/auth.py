@@ -85,10 +85,11 @@ def extract_cookie(raw_data):
     result = re.search(r'value="(.*)"', raw_data)
     try:
         cookie_value = result.group(1)
-        return cookie_value
     except AttributeError:
         logging.critical('Unable to obtain a valid cookie!')
         sys.exit(1)
+
+    return cookie_value
 
 
 def save_cookie(cookie_value):
