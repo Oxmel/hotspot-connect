@@ -94,14 +94,23 @@ def extract_cookie(raw_data):
 
 def save_cookie(cookie_value):
     logging.debug('Writing cookie file ' + cookie_file)
-    with open(cookie_file, 'w') as cf:
-       cf.write(cookie_value)
+    try:
+        with open(cookie_file, 'w') as cf:
+           cf.write(cookie_value)
+    except IOError:
+        logging.critical('Unable to write cookie file!')
+        sys.exit(1)
 
 
 def load_cookie():
     logging.debug('Loading cookie file ' + cookie_file)
-    with open(cookie_file, 'r') as cf:
-        return cf.read().strip()
+    try:
+        with open(cookie_file, 'r') as cf:
+            return cf.read().strip()
+    except IOError:
+        logging.critical('Unable to read cookie file!')
+        sys.exit(1)
+
 
 
 def perform_auth():
@@ -139,8 +148,13 @@ def perform_auth():
 # '50' means login success, '100' means login failed
 def check_auth(raw_data):
     result = re.search(r'<ResponseCode>(.*)</ResponseCode>', raw_data)
-    response_code = result.group(1)
-    logging.debug('Response code : ' + response_code)
+    try:
+        response_code = result.group(1)
+        logging.debug('Response code : ' + response_code)
+    except AttributeError:
+        logging.critical('Unable to check authentication status!')
+        sys.exit(1)
+
     if response_code == '50':
         return True
     return False
