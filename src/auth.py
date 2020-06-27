@@ -7,6 +7,7 @@ import sys
 import re
 import os
 
+
 # These credentials are needed to connect to the captive portal
 # The login is either a mobile phone number or an email address
 login = ''
@@ -52,7 +53,6 @@ params = {
     'lang': 'fr',
     'version': 'V2'
 }
-
 
 # Store cookie file '.cookie' in the root folder of the script
 cookie_file = os.path.abspath(__file__ + '/../../.cookie')
@@ -111,7 +111,6 @@ def load_cookie():
     except IOError:
         logging.critical('Unable to read cookie file!')
         sys.exit(1)
-
 
 
 def perform_auth():
