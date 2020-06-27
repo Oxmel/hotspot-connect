@@ -1,4 +1,4 @@
-## Hotspot Connect - v0.2.2
+## Hotspot Connect - v0.2.3
 
 Ce script assure à la fois la recherche de hotspots *orange* à proximité, la
 connexion au hotspot le plus proche et l'authentification sur le portail
