@@ -1,35 +1,20 @@
 ## Hotspot Connect - v0.2.2
 
-<br/>
+Ce script assure à la fois la recherche de hotspots *orange* à proximité, la
+connexion au hotspot le plus proche et l'authentification sur le portail
+captif. Mais également la surveillance et le maintien de la connexion sur la
+durée.
 
-**Note :** Orange a récemment mis à jour sa page d'authentification login.orange.fr avec un nouveau mécanisme de sécurité qui rend pour l'instant cette application inutilisable. Cependant, une solution semble exister pour contourner le problème et si tout va bien, un fix devrait pouvoir être mis en oeuvre assez rapidement. Plus d'infos ici : https://github.com/Oxmel/hotspot-connect/issues/7
+Un deuxième script va quant à lui permettre de configurer le Raspberry Pi en
+mode routeur pour offrir un serveur DHCP et partager la connexion sur le port
+ethernet. Et une fois qu'on a automatisé l'ensemble du processus (voir plus
+bas), le Pi adopte le même comportement que celui d'une box internet
+quelconque.
 
-<br/>
-
-Automatise le processus de connexion sur un hotspot *orange*.
-
-Le but ici est de transformer un hotspot *orange* en accès internet
-sédentaire à l'aide d'un Raspberry Pi. Pour cela on copie le fonctionnement
-classique d'un modem-routeur où la partie modem assure l'accès à internet,
-et la partie routeur assure, entre autres, l'adressage et la gestion des
-clients.
-
-Dans le cas présent, la partie modem va être assurée par le script
-hotspot-connect qui va prendre en charge tout le processus de connexion.
-Ce qui comprend la recherche de points d'accès disponibles, l'association
-avec le hotspot, l'authentification sur le portail captif, ainsi que la
-surveillance et le maintien de la connexion sur la durée.
-
-Un deuxième script va quant à lui se charger de configurer le Raspberry Pi
-en mode routeur pour offrir un serveur DHCP et partager la connexion
-internet. Et une fois qu'on a automatisé l'ensemble du processus
-(voir plus bas), le Raspberry Pi adopte le même comportement que celui
-d'une box internet quelconque.
-
-A noter qu'il est préférable (mais pas obligatoire) d'avoir plusieurs
-hotspots *orange* à proximité. Car si le hotspot courant disparaît ou ne
-fonctionne plus, le script cherchera automatiquement un autre candidat dans
-les environs.
+A noter qu'il est préférable (mais pas obligatoire) d'avoir plusieurs points
+d'accès *orange* à proximité. Car si le hotspot courant disparaît ou ne
+fonctionne plus, le script cherchera automatiquement un autre candidat dans les
+environs.
 
 ## Prérequis
 
