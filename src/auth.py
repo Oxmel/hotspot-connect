@@ -53,6 +53,7 @@ params = {
     'version': 'V2'
 }
 
+
 # Store cookie file '.cookie' in the root folder of the script
 cookie_file = os.path.abspath(__file__ + '/../../.cookie')
 
@@ -132,20 +133,20 @@ def perform_auth():
             logging.critical(e)
             sys.exit(1)
 
+        # '50' means login success, '100' means login failed
         auth_status = check_auth(req.text)
-        if auth_status:
-            logging.info('Authentication successfull!')
+        if auth_status == '50':
+            logging.info('Authentication successfull')
             return
-        if i == 0:
+        if i == 0 and auth_status == '100':
             logging.debug('Authentication refused, renewing cookie...')
             grab_cookie()
             continue
 
-        logging.critical('Login failed: invalid cookie')
+        logging.critical('Authentication failed! Response code : ' + auth_status)
         sys.exit(1)
 
 
-# '50' means login success, '100' means login failed
 def check_auth(raw_data):
     result = re.search(r'<ResponseCode>(.*)</ResponseCode>', raw_data)
     try:
@@ -155,6 +156,4 @@ def check_auth(raw_data):
         logging.critical('Unable to check authentication status!')
         sys.exit(1)
 
-    if response_code == '50':
-        return True
-    return False
+    return response_code
