@@ -55,6 +55,24 @@ class DiagTools():
         self.time_wait = 60
         self.max_wait = 3840
 
+
+    def assoc_poll(self):
+        """Repeatedly check association status (Polling)."""
+
+        i = 0
+        logging.debug('Polling wpa state...')
+        while i <= 20:
+            wifi_info = wifi.status()
+            wpa_state = wifi_info['wpa_state']
+            logging.debug('wpa state: %s' %wpa_state)
+            if wpa_state == 'COMPLETED':
+                return True
+
+            time.sleep(1)
+
+        return False
+
+
     def network_check(self):
         """
         Check and return the status of the connection.

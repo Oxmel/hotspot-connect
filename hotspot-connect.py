@@ -106,15 +106,11 @@ net_id = wifi.set_network()
 wifi.associate(net_id)
 
 logging.info("Association in progress...")
-time.sleep(30)
-
-wifi_info = wifi.status()
-wpa_state = wifi_info['wpa_state']
-
-if wpa_state != 'COMPLETED':
+if not diag.assoc_poll():
     logging.critical("Association failed!")
     sys.exit(1)
 
+wifi_info = wifi.status()
 bssid = wifi_info['bssid']
 signal = wifi.signal_strength()
 
