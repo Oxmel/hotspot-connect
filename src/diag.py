@@ -43,10 +43,6 @@ class DiagTools():
 
     def __init__(self):
 
-        # Used to calculate % of net errors
-        self.req_err = 0
-        self.req_sent = 0
-
         # List of bssid to ignore
         self.faulty_ap = []
 
@@ -90,8 +86,6 @@ class DiagTools():
         # Retry in case of non HTTP related errors
         for i in range(1, 5):
 
-            self.req_sent += 1
-
             try:
                 logging.debug("Sending a request to %s" %test_url)
                 req = requests.get(test_url, headers=headers, timeout=(10, 10))
@@ -117,12 +111,6 @@ class DiagTools():
             except requests.exceptions.RequestException as e:
                 logging.debug(e)
                 logging.debug("Target url unreachable, retrying (%s/4)" %i)
-
-                self.req_err += 1
-
-                if i == 2:
-                    logging.warning("The network connection is getting unstable!")
-
                 time.sleep(5)
                 continue
 
@@ -131,9 +119,6 @@ class DiagTools():
 
     def network_diag(self):
         """Perform a diagnostic of the connection."""
-
-        err_percent = self.err_percent()
-        logging.debug("Percentage of network errors (global): %s" %err_percent)
 
         for i in range(2):
 
@@ -245,15 +230,3 @@ class DiagTools():
         logging.info("Associating with the nearest AP...")
         wifi.associate(net_id)
         time.sleep(30)
-
-    def err_percent(self):
-        """Calculate the percentage of errors on the connection."""
-
-        req_count = self.req_sent
-        err_count = self.req_err
-
-        if req_count > 0 and err_count > 0:
-            result = ((err_count * 100) / req_count)
-            return result
-
-        return None
