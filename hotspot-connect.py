@@ -75,29 +75,18 @@ diag = diag.DiagTools()
 
 # Connect to wpa_supplicant control socket
 wifi.wpa_control()
+# Prepare wireless interface
+wifi.disconnect()
+wifi.remove_networks()
 
 logging.info("Looking for 'orange' hotspots...")
 
-# Disconnect the wireless interface.
-wifi.disconnect()
-# Remove all configured networks
-wifi.remove_networks()
-# Scan for available candidates in the vicinity
-wifi.scan()
-
-# Give wpa_supplicant the time to populate scan_results
-# The time needed may vary from one wifi card to another
-time.sleep(5)
-
-ap_list = wifi.scan_results()
-
-if ap_list == []:
+ap_count = diag.ap_count()
+if ap_count == 0:
     logging.critical("No candidate found in the area!")
     sys.exit(1)
 
-ap_count = len(ap_list)
 logging.info("Found %s candidate(s) in the area" %ap_count)
-logging.debug("List of available APs : %s" %ap_list)
 
 # Configure network profile an grab its id
 net_id = wifi.set_network()

@@ -52,6 +52,19 @@ class DiagTools():
         self.max_wait = 3840
 
 
+    def ap_count(self):
+        """Return number of available APs in the vicinity."""
+
+        wifi.scan()
+        # Gives wpa_supplicant time to populate scan_results
+        # The time needed may vary from one wifi card to another
+        time.sleep(5)
+        result = wifi.scan_results()
+        ap_count = len(result)
+
+        return ap_count
+
+
     def assoc_poll(self):
         """Repeatedly check association status (Polling)."""
 
