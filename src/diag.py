@@ -130,92 +130,49 @@ class DiagTools():
         logging.debug("Unable to reach target url after %s tries" %i)
         return 2
 
+
     def network_diag(self):
-        """Perform a diagnostic of the connection."""
+        """Diag and attempt to fix connection issues"""
 
-        for i in range(2):
+        wifi_info = wifi.status()
+        wpa_state = wifi_info['wpa_state']
+        # Return 'None' if no bssid or ip address
+        bssid = wifi_info.get('bssid')
+        ip = wifi_info.get('ip_address')
 
-            wifi_info = wifi.status()
-            wpa_state = wifi_info['wpa_state']
-            # Return 'None' if no bssid or ip address
-            bssid = wifi_info.get('bssid')
-            ip = wifi_info.get('ip_address')
-
-            if i == 0:
-
-                if wpa_state != "COMPLETED":
-                    logging.warning("Lost association with the hotspot!")
-                    logging.info("Trying to reassociate...")
-                    wifi.reassociate()
-                    time.sleep(30)
-                    continue
-
-                if ip == None or ip.startswith("169.254"):
-                    logging.warning("The current ip address is invalid")
-                    logging.info("Trying to obtain a valid ip...")
-                    wifi.reattach()
-                    time.sleep(20)
-                    continue
-
-                # Sometimes, like for instance when the signal is too weak,
-                # the connection can be broken even if everything seems ok.
-                break
-
-            if wpa_state == "COMPLETED" and ip and ip.startswith("10."):
-                    logging.info("Everything seems back to normal")
-                    return
-
-            logging.warning("Unable to fix the connection!")
-            break
-
-        if bssid:
-            logging.info("The current hotspot seems faulty, blacklisting.")
+        if not ip or ip.startswith('169.154'):
+            logging.warning('Unable to obtain a valid IP!')
             self.faulty_ap.append(bssid)
+            logging.info("Looking for another hotspot...")
+            self.manual_mode()
 
-        logging.info("Looking for another candidate...")
-        self.manual_mode()
+        if wpa_state != 'COMPLETED':
+            logging.warning('')
+            logging.info('Reconnecting to the nearest AP...')
+            self.auto_mode()
+
 
     def manual_mode(self):
         """Manually choose which AP to use."""
 
         wifi.disconnect()
         wifi.scan()
-
         time.sleep(5)
         avail_ap = wifi.scan_results()
-
         logging.debug("List of available ap : %s" %avail_ap)
         logging.debug("List of faulty ap : %s" %self.faulty_ap)
 
         for ap in avail_ap:
 
             if ap not in self.faulty_ap:
-                wifi.set_pref(ap)
-
-                logging.info("New candidate found")
-                logging.debug("Preffered bssid is now set to %s" %ap)
-                logging.info("Associating...")
-                wifi.reassociate()
-                time.sleep(30)
-
-                wifi_info = wifi.status()
-
-                if wifi_info['wpa_state'] != "COMPLETED":
-                    logging.warning("Association failed!")
-                    logging.info("Looking for another candidate...")
-                    self.faulty_ap.append(ap)
-                    continue
-
-                logging.info("Association successful")
-                logging.info("bssid  : %s" %ap)
-                signal = wifi.signal_strength()
-                logging.info("signal : -%s dBm" %signal)
+                self.auto_mode(ap)
                 return
 
-        logging.error("Tested all available hotspots but none of them work :-(")
-        self.faulty_ap = []
-        wifi.disconnect()
-        self.sleep_mode()
+            logging.error("Tested all available hotspots but none of them work :-(")
+            self.faulty_ap = []
+            wifi.disconnect()
+            self.sleep_mode()
+
 
     def sleep_mode(self):
         """Wait for a given period of time between two tries."""
@@ -234,12 +191,29 @@ class DiagTools():
         logging.info("Waking up...")
         self.auto_mode()
 
-    def auto_mode(self):
-        """Give back control to wpa_supplicant."""
 
-        wifi.remove_networks()
-        net_id = wifi.set_network()
+    def auto_mode(self, bssid=None):
+        """Connect either to the nearest AP or to a specified bssid"""
 
-        logging.info("Associating with the nearest AP...")
-        wifi.associate(net_id)
-        time.sleep(30)
+        if bssid:
+            wifi.set_pref(bssid)
+            logging.debug('Preffered bssid is now set to %s' %bssid)
+            wifi.reassociate()
+
+        else:
+            logging.debug('No bssid specified')
+            wifi.remove_networks()
+            net_id = wifi.set_network()
+            wifi.associate(net_id)
+
+        if not self.assoc_poll():
+            logging.critical("Association failed!")
+            sys.exit(1)
+
+        logging.info("Association successful :-)")
+        wifi_info = wifi.status()
+        bssid = wifi_info['bssid']
+        logging.info("bssid  : %s" %bssid)
+        signal = wifi.signal_strength()
+        logging.info("signal : -%s dBm" %signal)
+
