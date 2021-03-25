@@ -88,24 +88,8 @@ if ap_count == 0:
 
 logging.info("Found %s candidate(s) in the area" %ap_count)
 
-# Configure network profile an grab its id
-net_id = wifi.set_network()
-
-# Connect to the nearest hotspot
-wifi.associate(net_id)
-
-logging.info("Association in progress...")
-if not diag.assoc_poll():
-    logging.critical("Association failed!")
-    sys.exit(1)
-
-wifi_info = wifi.status()
-bssid = wifi_info['bssid']
-signal = wifi.signal_strength()
-
-logging.info("Association successfull :-)")
-logging.info("bssid  : %s" %bssid)
-logging.info("signal : -%s dBm" %signal)
+# Tell wpa_supplicant to connect to the nearest AP
+diag.auto_mode()
 
 # Display this message (only once) when internet is back
 # Way of saying that everything is ok
