@@ -165,11 +165,13 @@ class DiagTools():
             if ap not in self.faulty_ap:
                 self.auto_mode(ap)
                 return
+            else:
+                continue
 
-            logging.error("Tested all available hotspots but none of them work :-(")
-            self.faulty_ap = []
-            wifi.disconnect()
-            self.sleep_mode()
+        logging.error("Tested all available hotspots but none of them work :-(")
+        self.faulty_ap = []
+        wifi.disconnect()
+        self.sleep_mode()
 
 
     def sleep_mode(self):
