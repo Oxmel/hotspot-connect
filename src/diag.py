@@ -200,6 +200,7 @@ class DiagTools():
         if bssid:
             wifi.set_pref(bssid)
             logging.debug('Pref. bssid is now set to %s' %bssid)
+            wifi.disconnect()
             wifi.reassociate()
 
         else:
