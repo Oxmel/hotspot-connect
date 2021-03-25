@@ -137,17 +137,15 @@ class DiagTools():
 
         wifi_info = wifi.status()
         wpa_state = wifi_info['wpa_state']
-        # Return 'None' if no bssid or ip address
-        bssid = wifi_info.get('bssid')
-        ip = wifi_info.get('ip_address')
 
         if wpa_state != 'COMPLETED':
             logging.warning('Connection with the hotspot lost!')
             logging.info('Reconnecting to the nearest hotspot...')
             self.auto_mode()
 
-        if not ip or ip.startswith('169.254'):
-            logging.warning('Unable to obtain a valid IP!')
+        else:
+            logging.warning('Unable to fix connection!')
+            bssid = wifi_info['bssid']
             self.faulty_ap.append(bssid)
             logging.info("Looking for another hotspot...")
             self.manual_mode()
