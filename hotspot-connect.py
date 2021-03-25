@@ -75,9 +75,6 @@ diag = diag.DiagTools()
 
 # Connect to wpa_supplicant control socket
 wifi.wpa_control()
-# Prepare wireless interface
-wifi.disconnect()
-wifi.remove_networks()
 
 logging.info("Looking for 'orange' hotspots...")
 

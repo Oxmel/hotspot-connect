@@ -156,7 +156,6 @@ class DiagTools():
     def manual_mode(self):
         """Manually choose which AP to use."""
 
-        wifi.disconnect()
         wifi.scan()
         time.sleep(5)
         avail_ap = wifi.scan_results()
