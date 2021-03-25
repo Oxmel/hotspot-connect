@@ -78,6 +78,7 @@ class DiagTools():
                 return True
 
             time.sleep(1)
+            i += 1
 
         return False
 
@@ -140,15 +141,15 @@ class DiagTools():
         bssid = wifi_info.get('bssid')
         ip = wifi_info.get('ip_address')
 
-        if not ip or ip.startswith('169.154'):
+        if not ip or ip.startswith('169.254'):
             logging.warning('Unable to obtain a valid IP!')
             self.faulty_ap.append(bssid)
             logging.info("Looking for another hotspot...")
             self.manual_mode()
 
         if wpa_state != 'COMPLETED':
-            logging.warning('')
-            logging.info('Reconnecting to the nearest AP...')
+            logging.warning('Connection with the hotspot lost!')
+            logging.info('Reconnecting to the nearest hotspot...')
             self.auto_mode()
 
 
@@ -177,7 +178,7 @@ class DiagTools():
     def sleep_mode(self):
         """Wait for a given period of time between two tries."""
 
-        if self.time_wait >= 3840:
+        if self.time_wait >= self.max_wait:
             logging.debug("Already reached max time wait (%s)" %self.time_wait)
             self.time_wait = 60
 
@@ -195,9 +196,11 @@ class DiagTools():
     def auto_mode(self, bssid=None):
         """Connect either to the nearest AP or to a specified bssid"""
 
+        logging.info('Association in progress...')
+
         if bssid:
             wifi.set_pref(bssid)
-            logging.debug('Preffered bssid is now set to %s' %bssid)
+            logging.debug('Pref. bssid is now set to %s' %bssid)
             wifi.reassociate()
 
         else:
