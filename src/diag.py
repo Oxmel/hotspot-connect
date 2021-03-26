@@ -210,13 +210,21 @@ class DiagTools():
             wifi.associate(net_id)
 
         if not self.assoc_poll():
-            logging.critical("Association failed!")
-            sys.exit(1)
+            logging.warning('Association failed!')
+            if bssid:
+                logging.debug('Blacklisting bssid %s' %bssid)
+                self.faulty_ap.append(bssid)
 
-        logging.info("Association successful :-)")
-        wifi_info = wifi.status()
-        bssid = wifi_info['bssid']
-        logging.info("bssid  : %s" %bssid)
-        signal = wifi.signal_strength()
-        logging.info("signal : -%s dBm" %signal)
+            logging.info('Looking for another candidate...')
+            # Add a small delay to prevent a 'FAIL/BUSY' error
+            time.sleep(2)
+            self.manual_mode()
+
+        else:
+            logging.info("Association successful :-)")
+            wifi_info = wifi.status()
+            bssid = wifi_info['bssid']
+            logging.info("bssid  : %s" %bssid)
+            signal = wifi.signal_strength()
+            logging.info("signal : -%s dBm" %signal)
 
