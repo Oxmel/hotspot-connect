@@ -82,6 +82,23 @@ class DiagTools():
 
         return False
 
+    def dhcp_poll(self):
+        """Repeatedly check dhcp status (Polling)."""
+
+        i = 0
+        logging.debug('Polling ip address...')
+        while i <= 30:
+            wifi_info = wifi.status()
+            ip = wifi_info.get('ip_address')
+            logging.debug('ip address: %s' %ip)
+            if ip and ip.startswith('10.'):
+                return True
+
+            time.sleep(1)
+            i += 1
+
+        return False
+
 
     def network_check(self):
         """
@@ -130,6 +147,29 @@ class DiagTools():
 
         logging.debug("Unable to reach target url after %s tries" %i)
         return 2
+
+
+    def assoc_check(self):
+        """Check if connected to the hotspot with a valid ip"""
+
+        if not self.assoc_poll():
+            logging.warning('Association failed!')
+            self.sleep_mode()
+
+        if not self.dhcp_poll():
+            wifi_info = wifi.status()
+            bssid = wifi_info['bssid']
+            logging.warning('Unable to obtain a valid ip!')
+            self.faulty_ap.append(bssid)
+            self.manual.mode()
+
+        else:
+            wifi_info = wifi.status()
+            bssid = wifi_info['bssid']
+            logging.info("Association successful :-)")
+            logging.info("bssid  : %s" %bssid)
+            signal = wifi.signal_strength()
+            logging.info("signal : -%s dBm" %signal)
 
 
     def network_diag(self):
@@ -209,22 +249,7 @@ class DiagTools():
             net_id = wifi.set_network()
             wifi.associate(net_id)
 
-        if not self.assoc_poll():
-            logging.warning('Association failed!')
-            if bssid:
-                logging.debug('Blacklisting bssid %s' %bssid)
-                self.faulty_ap.append(bssid)
+        self.assoc_check()
 
-            logging.info('Looking for another candidate...')
-            # Add a small delay to prevent a 'FAIL/BUSY' error
-            time.sleep(2)
-            self.manual_mode()
 
-        else:
-            logging.info("Association successful :-)")
-            wifi_info = wifi.status()
-            bssid = wifi_info['bssid']
-            logging.info("bssid  : %s" %bssid)
-            signal = wifi.signal_strength()
-            logging.info("signal : -%s dBm" %signal)
 
