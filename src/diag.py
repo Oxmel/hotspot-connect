@@ -161,7 +161,7 @@ class DiagTools():
             bssid = wifi_info['bssid']
             logging.warning('Unable to obtain a valid ip!')
             self.faulty_ap.append(bssid)
-            self.manual.mode()
+            self.manual_mode()
 
         else:
             wifi_info = wifi.status()
