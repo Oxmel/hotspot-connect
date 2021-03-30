@@ -101,6 +101,8 @@ while True:
         if service_msg:
             logging.info("Network monitoring enabled")
             service_msg = False
+            # Reset sleeping time
+            diag.first_try = True
 
         time.sleep(20)
         continue
@@ -116,3 +118,5 @@ while True:
         logging.error('Network unreachable!')
         logging.info('Launching a connection diag...')
         diag.network_diag()
+        # Increase sleeping time after several failed attempt
+        diag.first_try = False

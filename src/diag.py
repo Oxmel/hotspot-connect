@@ -47,9 +47,11 @@ class DiagTools():
         self.faulty_ap = []
 
         # Sleep x secs if we can't find a working hotspot
-        # This value is multiplied by 2 for each failed attempt
-        self.time_wait = 60
-        self.max_wait = 3840
+        self.time_wait = 120
+        self.max_wait = 1920
+        # Switched to 'False' if multiple connection issues in a row
+        # If 'False', multiply sleep time by 2 for each failed attempt
+        self.first_try = True
 
 
     def ap_count(self):
@@ -217,15 +219,14 @@ class DiagTools():
     def sleep_mode(self):
         """Wait for a given period of time between two tries."""
 
-        if self.time_wait >= self.max_wait:
-            logging.debug("Already reached max time wait (%s)" %self.time_wait)
-            self.time_wait = 60
+        if self.first_try:
+            self.time_wait = 120
 
-        else:
+        if not self.first_try and not self.time_wait >= self.max_wait:
             self.time_wait = self.time_wait * 2
 
         sec_to_min = (self.time_wait / 60)
-        logging.info("Entering sleep mode...(next try in %smin)" %sec_to_min)
+        logging.info("Sleeping...(next try in %s min.)" %sec_to_min)
         time.sleep(self.time_wait)
 
         logging.info("Waking up...")
