@@ -156,6 +156,7 @@ class DiagTools():
 
         if not self.assoc_poll():
             logging.warning('Association failed!')
+            wifi.disconnect()
             self.sleep_mode()
 
         if not self.dhcp_poll():
