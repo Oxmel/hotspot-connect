@@ -12,11 +12,6 @@
     code returned by the server.
 
     https://android.stackexchange.com/q/123129
-
-    Since a lot of things can go wrong when trying to maintain a
-    connection on that kind of hostpot, we also diag and attempt to
-    fix the issue in case of network errors. Which is the trickiest
-    part as many factors can influence the connection stability.
 """
 
 
@@ -112,11 +107,9 @@ class DiagTools():
 
         Note: Since the network can be unstable at times, requests
         will sometimes raise a random (i.e. Non HTTP) error when
-        trying to call the test url. In these cases, it's recommended
-        to retry x times before considering that the network is down.
+        trying to call the test url.
         """
 
-        # Retry in case of non HTTP related errors
         for i in range(1, 5):
 
             try:
@@ -135,7 +128,6 @@ class DiagTools():
                 logging.critical("Unhandled HTTP code: %s" %http_code)
                 sys.exit(1)
 
-            # Exception raised in case of http error (4xx, 5xx,...)
             except requests.exceptions.HTTPError as e:
                 logging.critical(e)
                 sys.exit(1)
@@ -155,14 +147,14 @@ class DiagTools():
         """Check if connected to the hotspot with a valid ip"""
 
         if not self.assoc_poll():
-            logging.warning('Association failed!')
+            logging.error('Association failed!')
             wifi.disconnect()
             self.sleep_mode()
 
         if not self.dhcp_poll():
             wifi_info = wifi.status()
             bssid = wifi_info['bssid']
-            logging.warning('Unable to obtain a valid ip!')
+            logging.error('Unable to obtain a valid ip!')
             self.faulty_ap.append(bssid)
             self.manual_mode()
 
@@ -176,21 +168,21 @@ class DiagTools():
 
 
     def network_diag(self):
-        """Diag and attempt to fix connection issues"""
+        """Check if associated with a hotspot."""
 
         wifi_info = wifi.status()
         wpa_state = wifi_info['wpa_state']
 
         if wpa_state != 'COMPLETED':
-            logging.warning('Connection with the hotspot lost!')
-            logging.info('Reconnecting to the nearest hotspot...')
+            logging.info('Connection with the hotspot lost')
+            logging.info('Reconnecting...')
             self.auto_mode()
 
         else:
-            logging.warning('Unable to fix connection!')
+            logging.info('Unable to fix connection')
             bssid = wifi_info['bssid']
             self.faulty_ap.append(bssid)
-            logging.info("Looking for another hotspot...")
+            logging.info('Looking for another hotspot...')
             self.manual_mode()
 
 
@@ -211,7 +203,7 @@ class DiagTools():
             else:
                 continue
 
-        logging.error("Tested all available hotspots but none of them work :-(")
+        logging.error('Could not find a working hotspot :-(')
         self.faulty_ap = []
         wifi.disconnect()
         self.sleep_mode()
