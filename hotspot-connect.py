@@ -104,7 +104,7 @@ while True:
             # Reset sleeping time
             diag.first_try = True
 
-        time.sleep(20)
+        time.sleep(60)
         continue
 
     service_msg = True
