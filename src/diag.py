@@ -189,6 +189,7 @@ class DiagTools():
     def manual_mode(self):
         """Manually choose which AP to use."""
 
+        wifi.disconnect()
         wifi.scan()
         time.sleep(5)
         avail_ap = wifi.scan_results()
@@ -205,7 +206,6 @@ class DiagTools():
 
         logging.error('Could not find a working hotspot :-(')
         self.faulty_ap = []
-        wifi.disconnect()
         self.sleep_mode()
 
 
@@ -234,7 +234,6 @@ class DiagTools():
         if bssid:
             wifi.set_pref(bssid)
             logging.debug('Pref. bssid is now set to %s' %bssid)
-            wifi.disconnect()
             wifi.reassociate()
 
         else:
