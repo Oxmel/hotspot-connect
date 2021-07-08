@@ -1,3 +1,5 @@
+### Mise à jour : Orange a décidé de stopper son service de wifi partagé à partir du [1er août 2021](https://assistance.orange.fr/livebox-modem/toutes-les-livebox-et-modems/installer-et-utiliser/connecter-et-associer-votre-materiel/la-connexion-wifi-en-mobilite-hotspot/wifi-partage-arret-du-service_340627-874323). Ce qui signe donc malheureusement la fin de ce projet.
+
 ## Hotspot Connect - v0.2.3
 
 Ce script assure à la fois la recherche de hotspots *orange* à proximité, la
